@@ -5,7 +5,7 @@ import {
     findSinglePost,
     getAllPosts,
     updatePost
-} from "./router descriptions/post-router-description";
+} from "./router handlers/post-router-description";
 
 import {postInputModelValidation} from "../validation/PostInputModel-validation-middleware";
 import {inputErrorManagementMiddleware} from "../validation/error-management-validation-middleware";

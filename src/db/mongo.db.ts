@@ -1,6 +1,6 @@
 import {Collection, Db, MongoClient} from "mongodb";
-import { BlogViewModel } from "../types/blog-view-model";
-import {PostViewModel} from "../types/post-view-model";
+import { BlogViewModel } from "../routers/router-types/blog-view-model";
+import {PostViewModel} from "../routers/router-types/post-view-model";
 
 const DB_NAME = 'bloggers_db';
 const BLOGGERS_COLLECTION_NAME = 'bloggers_collection';

@@ -1,13 +1,13 @@
 import request from 'supertest';
 import express from "express";
 import {setupApp} from "../src/setup-app";
-import {BlogInputModel} from "../src/types/blog-input-model";
+import {BlogInputModel} from "../src/routers/router-types/blog-input-model";
 import {BLOGS_PATH, TESTING_PATH} from "../src/routers/router-pathes";
 import {bloggerCollectionStorageModel, dataRepository} from "../src/repository/blogger-mongodb-repository";
 import {HttpStatus} from "../src/core/http-statuses";
 import {bloggersCollection, postsCollection, runDB} from "../src/db/mongo.db";
 import {ObjectId} from "mongodb";
-import {PostInputModel} from "../src/types/post-input-model";
+import {PostInputModel} from "../src/routers/router-types/post-input-model";
 
 describe("Test API for managing blogs(bloggers)", () =>{
 

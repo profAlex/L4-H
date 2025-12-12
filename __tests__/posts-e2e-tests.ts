@@ -1,12 +1,12 @@
 import express from "express";
 import {setupApp} from "../src/setup-app";
-import {PostInputModel} from "../src/types/post-input-model";
+import {PostInputModel} from "../src/routers/router-types/post-input-model";
 import {dataRepository} from "../src/repository/blogger-mongodb-repository";
 import request from "supertest";
 import {POSTS_PATH, TESTING_PATH} from "../src/routers/router-pathes";
 import {HttpStatus} from "../src/core/http-statuses";
 import {runDB} from "../src/db/mongo.db";
-import {BlogInputModel} from "../src/types/blog-input-model";
+import {BlogInputModel} from "../src/routers/router-types/blog-input-model";
 
 describe("Test API for managing posts inside blogs", () =>{
     const testApp = express();

@@ -5,8 +5,8 @@ import request from "supertest";
 import {TESTING_PATH} from "../src/routers/router-pathes";
 import {HttpStatus} from "../src/core/http-statuses";
 import {runDB} from "../src/db/mongo.db";
-import {BlogInputModel} from "../src/types/blog-input-model";
-import {PostInputModel} from "../src/types/post-input-model";
+import {BlogInputModel} from "../src/routers/router-types/blog-input-model";
+import {PostInputModel} from "../src/routers/router-types/post-input-model";
 
 describe("Test API commands for testing", () => {
     it("DELETE ALL '/api/testing/all-data/' - should delete whole repository", async() => {

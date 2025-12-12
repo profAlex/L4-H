@@ -1,7 +1,7 @@
-import {BlogViewModel} from "../types/blog-view-model";
-import {BlogInputModel} from "../types/blog-input-model";
-import {PostViewModel} from "../types/post-view-model";
-import {PostInputModel} from "../types/post-input-model";
+import {BlogViewModel} from "../routers/router-types/blog-view-model";
+import {BlogInputModel} from "../routers/router-types/blog-input-model";
+import {PostViewModel} from "../routers/router-types/post-view-model";
+import {PostInputModel} from "../routers/router-types/post-input-model";
 import {bloggersCollection, postsCollection} from "../db/mongo.db";
 import {ObjectId, WithId} from "mongodb";
 

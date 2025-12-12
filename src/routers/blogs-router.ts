@@ -5,7 +5,7 @@ import {
     findSingleBlog,
     getAllBlogs,
     updateBlog
-} from "./router descriptions/blog-router-description";
+} from "./router handlers/blog-router-description";
 import {blogInputModelValidation} from "../validation/BlogInputModel-validation-middleware";
 import {inputErrorManagementMiddleware} from "../validation/error-management-validation-middleware";
 import {inputIdValidation} from "../validation/id-input-validation-middleware";

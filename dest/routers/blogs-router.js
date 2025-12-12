@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blogsRouter = void 0;
 const express_1 = require("express");
-const blog_router_description_1 = require("./router descriptions/blog-router-description");
+const blog_router_description_1 = require("./router handlers/blog-router-description");
 const BlogInputModel_validation_middleware_1 = require("../validation/BlogInputModel-validation-middleware");
 const error_management_validation_middleware_1 = require("../validation/error-management-validation-middleware");
 const id_input_validation_middleware_1 = require("../validation/id-input-validation-middleware");
