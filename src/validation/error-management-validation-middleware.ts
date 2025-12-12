@@ -14,14 +14,14 @@ const formatErrors = (error: ValidationError): ValidationErrorType => {
 };
 
 export const inputErrorManagementMiddleware = (
-    req: Request,
+    req: Request<{},{},{},{}>,
     res: Response,
     next: NextFunction,
 ) => {
     const errors = validationResult(req).formatWith(formatErrors).array({ onlyFirstError: true });
 
     if (errors.length > 0) {
-        console.log("WE GOT HERE FOR SOME REASON??");
+        // console.log("WE GOT HERE FOR SOME REASON??");
         // console.log(errors); //для отладки, иначе непонятно где смотреть ошибки в случае их возникновения
 
         res.status(HttpStatus.BadRequest).json({ errorsMessages: errors });

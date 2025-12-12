@@ -10,10 +10,12 @@ import {blogInputModelValidation} from "../validation/BlogInputModel-validation-
 import {inputErrorManagementMiddleware} from "../validation/error-management-validation-middleware";
 import {inputIdValidation} from "../validation/id-input-validation-middleware";
 import {superAdminGuardMiddleware} from "../validation/base64-auth-guard_middleware";
+import {SortListEnum} from "./util-enums/fields-for-sorting";
+import {inputPaginationValidator} from "./blogs-validation-middleware/blog-pagination-validator";
 
 export const blogsRouter = Router();
 
-blogsRouter.get('/', getAllBlogs);
+blogsRouter.get('/', inputPaginationValidator(SortListEnum), inputErrorManagementMiddleware, getAllBlogs);
 // где обрабатывать массив errorMessages (который в функции inputErrorManagementMiddleware), где его органично выводить если он не пустой?
 blogsRouter.post('/', superAdminGuardMiddleware, blogInputModelValidation, inputErrorManagementMiddleware, createNewBlog); //auth guarded
 blogsRouter.get('/:id', inputIdValidation, inputErrorManagementMiddleware, findSingleBlog);

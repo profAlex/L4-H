@@ -1,5 +1,8 @@
 export enum SortListEnum {
-    CreatedAt = 'createdAt',
+    Id = 'id',
     Name = 'name',
-    Email = 'email',
+    Description = 'description',
+    WebsiteUrl = 'websiteUrl',
+    CreatedAt = 'createdAt',
+    IsMembership = 'isMembership',
 };
