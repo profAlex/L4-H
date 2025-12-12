@@ -1,9 +1,28 @@
 import {Request, Response} from "express";
 import {HttpStatus} from "../../core/http-statuses";
 import {dataRepository} from "../../repository/blogger-mongodb-repository";
+import {blogsService} from "../../service/blogs-service";
+import {InputGetBlogsQuery} from "../router-types/blog-search-input-model";
+import {matchedData} from "express-validator";
+import {PaginatedBlogViewModel} from "../router-types/blog-paginated-view-model";
 
-export const getAllBlogs = async (req:Request, res:Response) => {
-    res.status(HttpStatus.Ok).json(await dataRepository.getAllBlogs());
+export const getSeveralBlogs = async (req: Request<{}, {}, {}, InputGetBlogsQuery>, res: Response) => {
+
+    const sanitizedQuery = matchedData<InputGetBlogsQuery>(req, {
+        locations: ['query'],
+        includeOptionals: true,
+    }); //утилита для извечения трансформированных значений после валидатара
+    //в req.query остаются сырые квери параметры (строки)
+
+    const results: PaginatedBlogViewModel = await blogsService.getSeveralBlogs(sanitizedQuery);
+
+    const driversListOutput = mapToDriverListPaginatedOutput(items, {
+        pageNumber: sanitizedQuery.pageNumber,
+        pageSize: sanitizedQuery.pageSize,
+        totalCount,
+    });
+
+    res.status(HttpStatus.Ok).send(driversListOutput);
 };
 
 export const createNewBlog = async (req: Request, res: Response) => {

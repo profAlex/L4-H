@@ -1,9 +1,11 @@
 import {CustomSortDirection} from "../routers/util-enums/sort-direction";
-
-
+import {Request, Response} from "express";
 
 
 
 export const blogsService = {
-    async getAllBlogs(inputBlogsQueryDto: InputBlogsQuery) {}
+    async getSeveralBlogs() {
+
+        res.status(HttpStatus.Ok).json(await dataRepository.getAllBlogs());
+    }
 }
