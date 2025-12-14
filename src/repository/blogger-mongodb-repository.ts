@@ -4,6 +4,7 @@ import {PostViewModel} from "../routers/router-types/post-view-model";
 import {PostInputModel} from "../routers/router-types/post-input-model";
 import {bloggersCollection, postsCollection} from "../db/mongo.db";
 import {ObjectId, WithId} from "mongodb";
+import {InputGetBlogsQuery} from "../routers/router-types/blog-search-input-model";
 
 // type blogPost = {
 //     postId: string;
@@ -194,7 +195,7 @@ export const dataRepository = {
     // *****************************
     // методы для управления блогами
     // *****************************
-    async getAllBlogs(): Promise<BlogViewModel[]> {
+    async getSeveralBlogs(sentInputGetDriverQuery: InputGetBlogsQuery) : Promise<{items: WithId<BlogViewModel>[]; totalCount: number}> {
         // return __nonDisclosableDatabase.bloggerRepository.map(({ bloggerInfo }) => ({
         //     id: bloggerInfo.id,
         //     name: bloggerInfo.name,
@@ -202,16 +203,28 @@ export const dataRepository = {
         //     websiteUrl: bloggerInfo.websiteUrl
         // }));
 
-        const tempContainer: bloggerCollectionStorageModel[]  = await bloggersCollection.find({}).toArray();
+        let tempDto;
+        const {
+            searchNameTerm,
+            sortBy,
+            sortDirection,
+            pageNumber,
+            pageSize,
+        } = sentInputGetDriverQuery;
 
-        return tempContainer.map((value: bloggerCollectionStorageModel) => ({
-            id: value._id.toString(),
-            name: value.name,
-            description: value.description,
-            websiteUrl: value.websiteUrl,
-            createdAt: value.createdAt,
-            isMembership: false
-        }));
+        const filter :any = {};
+        const skip = (pageNumber - 1) * pageSize;
+
+        // const tempContainer: bloggerCollectionStorageModel[]  = await bloggersCollection.find({}).toArray();
+        //
+        // return tempContainer.map((value: bloggerCollectionStorageModel) => ({
+        //     id: value._id.toString(),
+        //     name: value.name,
+        //     description: value.description,
+        //     websiteUrl: value.websiteUrl,
+        //     createdAt: value.createdAt,
+        //     isMembership: false
+        // }));
 
         // _id: ObjectId,
         // id: string;
@@ -220,7 +233,35 @@ export const dataRepository = {
         // websiteUrl: string;
         // createdAt: Date;
         // isMembership: boolean;
+
+        if(searchNameTerm)
+        {
+            filter.push({ name: { $regex: searchNameTerm, $options: 'i' } });
+        }
+
+        if(!sortBy) {
+            throw new Error();
+        }
+
+        const items = await bloggersCollection
+            .find(filter)
+
+            // "asc" (по возрастанию), то используется 1
+            // "desc" — то -1 для сортировки по убыванию. - по алфавиту от Я-А, Z-A
+            .sort({[sortBy]: sortDirection})
+
+            // пропускаем определённое количество док. перед тем, как вернуть нужный набор данных.
+            .skip(skip)
+
+            // ограничивает количество возвращаемых документов до значения pageSize
+            .limit(pageSize)
+            .toArray();
+
+        const totalCount = await bloggersCollection.countDocuments(filter);
+
+        return {items, totalCount};
     },
+
 
     async createNewBlog(newBlog: BlogInputModel): Promise <BlogViewModel> {
         const tempId = new ObjectId();
@@ -239,6 +280,7 @@ export const dataRepository = {
         // console.log("ID Inside repository: ",newBlogEntry.id);
         return transformSingleBloggerCollectionToViewModel(newBlogEntry);
     },
+
 
     async findSingleBlog(blogId: string): Promise<BlogViewModel | undefined> {
 
@@ -263,6 +305,7 @@ export const dataRepository = {
 
         return undefined;
     },
+
 
     async updateBlog(blogId: string, newData: BlogInputModel): Promise<null | undefined> {
 
@@ -303,6 +346,7 @@ export const dataRepository = {
 
         return undefined;
     },
+
 
     async deleteBlog(blogId: string): Promise<null | undefined> {
 

@@ -5,18 +5,21 @@ import {blogsService} from "../../service/blogs-service";
 import {InputGetBlogsQuery} from "../router-types/blog-search-input-model";
 import {matchedData} from "express-validator";
 import {PaginatedBlogViewModel} from "../router-types/blog-paginated-view-model";
+import {BlogViewModel} from "../router-types/blog-view-model";
+import {WithId} from "mongodb";
+import {mapToBlogListPaginatedOutput} from "../mappers/map-blog-search-to-view-model";
+
 
 export const getSeveralBlogs = async (req: Request<{}, {}, {}, InputGetBlogsQuery>, res: Response) => {
-
     const sanitizedQuery = matchedData<InputGetBlogsQuery>(req, {
         locations: ['query'],
         includeOptionals: true,
     }); //утилита для извечения трансформированных значений после валидатара
     //в req.query остаются сырые квери параметры (строки)
 
-    const results: PaginatedBlogViewModel = await blogsService.getSeveralBlogs(sanitizedQuery);
+    const {items, totalCount} = await blogsService.getSeveralBlogs(sanitizedQuery);
 
-    const driversListOutput = mapToDriverListPaginatedOutput(items, {
+    const driversListOutput = mapToBlogListPaginatedOutput(items, {
         pageNumber: sanitizedQuery.pageNumber,
         pageSize: sanitizedQuery.pageSize,
         totalCount,
