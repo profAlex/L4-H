@@ -312,7 +312,7 @@ export const dataRepository = {
             .limit(pageSize)
             .toArray();
 
-        const totalCount = await bloggersCollection.countDocuments({id: sentBlogId});
+        const totalCount = await postsCollection.countDocuments({id: sentBlogId});
 
         return {items, totalCount};
     },

@@ -58,7 +58,7 @@ export const getSeveralPostsFromBlog = async (req: Request<{blogId: string}, {},
 };
 
 export const findSingleBlog = async (req: Request, res: Response) => {
-    const result = await dataRepository.findSingleBlog(req.params.id);
+    const result = await blogsService.findSingleBlog(req.params.id);
 
     if(result === undefined)
     {
@@ -69,7 +69,7 @@ export const findSingleBlog = async (req: Request, res: Response) => {
 };
 
 export const updateBlog = async (req: Request, res: Response) => {
-    const result = await dataRepository.updateBlog(req.params.id, req.body);
+    const result = await blogsService.updateBlog(req.params.id, req.body);
 
     if(result === undefined)
     {

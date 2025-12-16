@@ -25,4 +25,18 @@ export const blogsService = {
 
         return await dataRepository.getSeveralPosts(sentBlogId, sent);
     },
+
+    async findSingleBlog(blogId: string): Promise<BlogViewModel | undefined> {
+
+        return await dataRepository.findSingleBlog(blogId);
+    },
+
+    async updateBlog (blogId: string, newData: BlogInputModel) {
+        return await dataRepository.updateBlog(blogId, newData);
+    },
+
+    async deleteBlog (blogId: string) {
+        return await dataRepository.deleteBlog(blogId);
+    },
+
 }
