@@ -4,12 +4,19 @@ import {InputGetBlogsQuery} from "../routers/router-types/blog-search-input-mode
 import {WithId} from "mongodb";
 import {BlogViewModel} from "../routers/router-types/blog-view-model";
 import {dataRepository} from "../repository/blogger-mongodb-repository";
+import {InputGetBlogPostsByIdQuery} from "../routers/router-types/blog-search-by-id-input-model";
+import {PostViewModel} from "../routers/router-types/post-view-model";
 
 
 
 export const blogsService = {
-    async getSeveralBlogs(sentInputGetDriverQuery: InputGetBlogsQuery) : Promise<{items: WithId<BlogViewModel>[]; totalCount: number}> {
+    async getSeveralBlogs(sentInputGetDriverQuery: InputGetBlogsQuery): Promise<{items: WithId<BlogViewModel>[]; totalCount: number}> {
 
         return await dataRepository.getSeveralBlogs(sentInputGetDriverQuery);
+    },
+
+    async getAllPostsFromBlog(sentBlogId:string, sent: InputGetBlogPostsByIdQuery): Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
+
+        return await dataRepository.getSeveralPosts(sentBlogId, sent);
     }
 }

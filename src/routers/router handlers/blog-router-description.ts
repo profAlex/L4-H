@@ -7,7 +7,8 @@ import {matchedData} from "express-validator";
 import {PaginatedBlogViewModel} from "../router-types/blog-paginated-view-model";
 import {BlogViewModel} from "../router-types/blog-view-model";
 import {WithId} from "mongodb";
-import {mapToBlogListPaginatedOutput} from "../mappers/map-blog-search-to-view-model";
+import {mapToBlogListPaginatedOutput, mapToPostListPaginatedOutput} from "../mappers/map-blog-search-to-view-model";
+import {InputGetBlogPostsByIdQuery} from "../router-types/blog-search-by-id-input-model";
 
 
 export const getSeveralBlogs = async (req: Request<{}, {}, {}, InputGetBlogsQuery>, res: Response) => {
@@ -28,8 +29,32 @@ export const getSeveralBlogs = async (req: Request<{}, {}, {}, InputGetBlogsQuer
     res.status(HttpStatus.Ok).send(driversListOutput);
 };
 
+
 export const createNewBlog = async (req: Request, res: Response) => {
     res.status(HttpStatus.Created).json(await dataRepository.createNewBlog(req.body));
+};
+
+
+export const getSeveralPostsFromBlog = async (req: Request<{blogId: string}, {}, {}, InputGetBlogPostsByIdQuery>, res: Response) => {
+    const sanitizedQuery = matchedData<InputGetBlogPostsByIdQuery>(req, {
+        locations: ['query'],
+        includeOptionals: true,
+    }); //утилита для извечения трансформированных значений после валидатара
+    //в req.query остаются сырые квери параметры (строки)
+    const blogId = req.params.blogId;
+    if (!blogId) {
+        res.status(400).json({ error: 'blogId is required' });
+    }
+
+    const {items, totalCount} = await blogsService.getAllPostsFromBlog(blogId, sanitizedQuery);
+
+    const driversListOutput = mapToPostListPaginatedOutput(items, {
+        pageNumber: sanitizedQuery.pageNumber,
+        pageSize: sanitizedQuery.pageSize,
+        totalCount,
+    });
+
+    res.status(HttpStatus.Ok).send(driversListOutput);
 };
 
 export const findSingleBlog = async (req: Request, res: Response) => {

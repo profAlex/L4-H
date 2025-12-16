@@ -5,6 +5,7 @@ import {PostInputModel} from "../routers/router-types/post-input-model";
 import {bloggersCollection, postsCollection} from "../db/mongo.db";
 import {ObjectId, WithId} from "mongodb";
 import {InputGetBlogsQuery} from "../routers/router-types/blog-search-input-model";
+import {InputGetBlogPostsByIdQuery} from "../routers/router-types/blog-search-by-id-input-model";
 
 // type blogPost = {
 //     postId: string;
@@ -281,6 +282,40 @@ export const dataRepository = {
         return transformSingleBloggerCollectionToViewModel(newBlogEntry);
     },
 
+    async getSeveralPosts(sentBlogId:string, sent: InputGetBlogPostsByIdQuery) : Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
+        let tempDto;
+        const {
+            sortBy,
+            sortDirection,
+            pageNumber,
+            pageSize,
+        } = sent;
+
+        const filter :any = {};
+        const skip = (pageNumber - 1) * pageSize;
+
+        if(!sortBy) {
+            throw new Error();
+        }
+
+        const items = await postsCollection
+            .find({id: sentBlogId})
+
+            // "asc" (по возрастанию), то используется 1
+            // "desc" — то -1 для сортировки по убыванию. - по алфавиту от Я-А, Z-A
+            .sort({[sortBy]: sortDirection})
+
+            // пропускаем определённое количество док. перед тем, как вернуть нужный набор данных.
+            .skip(skip)
+
+            // ограничивает количество возвращаемых документов до значения pageSize
+            .limit(pageSize)
+            .toArray();
+
+        const totalCount = await bloggersCollection.countDocuments({id: sentBlogId});
+
+        return {items, totalCount};
+    },
 
     async findSingleBlog(blogId: string): Promise<BlogViewModel | undefined> {
 
