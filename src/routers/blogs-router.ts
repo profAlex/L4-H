@@ -13,6 +13,8 @@ import {superAdminGuardMiddleware} from "../validation/base64-auth-guard_middlew
 import {BlogsSortListEnum} from "./util-enums/fields-for-sorting";
 import {inputPaginationValidator} from "./blogs-validation-middleware/blog-pagination-validator";
 import {inputBlogIdValidation} from "../validation/blogid-input-validation-middleware";
+import {postInputModelValidation} from "../validation/PostInputModel-validation-middleware";
+import {createNewPost} from "./router handlers/post-router-description";
 
 export const blogsRouter = Router();
 
@@ -21,6 +23,7 @@ blogsRouter.get('/', inputPaginationValidator(BlogsSortListEnum), inputErrorMana
 blogsRouter.post('/', superAdminGuardMiddleware, blogInputModelValidation, inputErrorManagementMiddleware, createNewBlog); //auth guarded
 
 blogsRouter.get('/:blogId/posts', inputBlogIdValidation, inputPaginationValidator(BlogsSortListEnum), inputErrorManagementMiddleware, getSeveralPostsFromBlog);
+blogsRouter.post('/:blogId/posts', superAdminGuardMiddleware, inputBlogIdValidation, postInputModelValidation, inputErrorManagementMiddleware, createNewPost);
 
 blogsRouter.get('/:id', inputIdValidation, inputErrorManagementMiddleware, findSingleBlog);
 // inputErrorManagementMiddleware два раза или один? проверить!

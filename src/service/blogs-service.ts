@@ -6,6 +6,7 @@ import {BlogViewModel} from "../routers/router-types/blog-view-model";
 import {dataRepository} from "../repository/blogger-mongodb-repository";
 import {InputGetBlogPostsByIdQuery} from "../routers/router-types/blog-search-by-id-input-model";
 import {PostViewModel} from "../routers/router-types/post-view-model";
+import {BlogInputModel} from "../routers/router-types/blog-input-model";
 
 
 
@@ -15,8 +16,13 @@ export const blogsService = {
         return await dataRepository.getSeveralBlogs(sentInputGetDriverQuery);
     },
 
+    async createNewBlog(newBlog: BlogInputModel) {
+
+        return await dataRepository.createNewBlog(newBlog);
+    },
+
     async getAllPostsFromBlog(sentBlogId:string, sent: InputGetBlogPostsByIdQuery): Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
 
         return await dataRepository.getSeveralPosts(sentBlogId, sent);
-    }
+    },
 }

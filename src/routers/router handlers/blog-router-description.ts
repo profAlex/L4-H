@@ -31,7 +31,7 @@ export const getSeveralBlogs = async (req: Request<{}, {}, {}, InputGetBlogsQuer
 
 
 export const createNewBlog = async (req: Request, res: Response) => {
-    res.status(HttpStatus.Created).json(await dataRepository.createNewBlog(req.body));
+    res.status(HttpStatus.Created).json(await blogsService.createNewBlog(req.body));
 };
 
 
