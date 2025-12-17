@@ -35,16 +35,23 @@ export const createNewBlog = async (req: Request, res: Response) => {
 };
 
 
+
 export const getSeveralPostsFromBlog = async (req: Request<{blogId: string}, {}, {}, InputGetBlogPostsByIdQuery>, res: Response) => {
     const sanitizedQuery = matchedData<InputGetBlogPostsByIdQuery>(req, {
         locations: ['query'],
         includeOptionals: true,
     }); //утилита для извечения трансформированных значений после валидатара
     //в req.query остаются сырые квери параметры (строки)
+
     const blogId = req.params.blogId;
     if (!blogId) {
         res.status(400).json({ error: 'blogId is required' });
     }
+
+    // console.log('<------------ HAVE WE GOT HERE????');
+    // console.log(sanitizedQuery);
+    // console.log(blogId);
+
 
     const {items, totalCount} = await blogsService.getAllPostsFromBlog(blogId, sanitizedQuery);
 

@@ -8,6 +8,9 @@ const POSTS_COLLECTION_NAME = 'posts_collection';
 
 const URI = "mongodb+srv://admin:admin@learningcluster.f1zm90x.mongodb.net/?retryWrites=true&w=majority&appName=LearningCluster";
 
+
+let db: Db;
+
 export let client: MongoClient;
 export let bloggersCollection: Collection<BlogViewModel>;
 export let postsCollection: Collection<PostViewModel>;
@@ -15,7 +18,7 @@ export let postsCollection: Collection<PostViewModel>;
 
 export async function runDB() {
     client = new MongoClient(URI);
-    const db: Db = client.db(DB_NAME);
+    db = client.db(DB_NAME);
     bloggersCollection = db.collection<BlogViewModel>(BLOGGERS_COLLECTION_NAME);
     postsCollection = db.collection<PostViewModel>(POSTS_COLLECTION_NAME);
 
@@ -30,3 +33,5 @@ export async function runDB() {
         throw new Error(`Database not connected: ${error}`);
     }
 }
+
+export { db };

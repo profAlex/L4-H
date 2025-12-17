@@ -21,9 +21,9 @@ export const blogsService = {
         return await dataRepository.createNewBlog(newBlog);
     },
 
-    async getAllPostsFromBlog(sentBlogId:string, sent: InputGetBlogPostsByIdQuery): Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
+    async getAllPostsFromBlog(sentBlogId:string, sentSanitizedQuery: InputGetBlogPostsByIdQuery): Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
 
-        return await dataRepository.getSeveralPosts(sentBlogId, sent);
+        return await dataRepository.getSeveralPosts(sentBlogId, sentSanitizedQuery);
     },
 
     async findSingleBlog(blogId: string): Promise<BlogViewModel | undefined> {

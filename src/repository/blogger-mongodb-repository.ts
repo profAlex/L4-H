@@ -282,14 +282,22 @@ export const dataRepository = {
         return transformSingleBloggerCollectionToViewModel(newBlogEntry);
     },
 
-    async getSeveralPosts(sentBlogId:string, sent: InputGetBlogPostsByIdQuery) : Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
+    async getSeveralPosts(sentBlogId:string, sentSanitizedQuery: InputGetBlogPostsByIdQuery) : Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
         let tempDto;
         const {
             sortBy,
             sortDirection,
             pageNumber,
             pageSize,
-        } = sent;
+        } = sentSanitizedQuery;
+
+        // console.log('<------------HAVE WE GOT HERE_2 ????');
+        // console.log(`sortBy: ${sortBy}`);
+        // console.log(`sortDirection: ${sortDirection}`);
+        // console.log(`pageNumber: ${pageNumber}`);
+        // console.log(`pageSize: ${pageSize}`);
+        //
+        // console.log(sentBlogId);
 
         const filter :any = {};
         const skip = (pageNumber - 1) * pageSize;
@@ -299,7 +307,7 @@ export const dataRepository = {
         }
 
         const items = await postsCollection
-            .find({id: sentBlogId})
+            .find({blogId: sentBlogId})
 
             // "asc" (по возрастанию), то используется 1
             // "desc" — то -1 для сортировки по убыванию. - по алфавиту от Я-А, Z-A
@@ -312,7 +320,7 @@ export const dataRepository = {
             .limit(pageSize)
             .toArray();
 
-        const totalCount = await postsCollection.countDocuments({id: sentBlogId});
+        const totalCount = await postsCollection.countDocuments({blogId: sentBlogId});
 
         return {items, totalCount};
     },

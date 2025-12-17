@@ -10,9 +10,10 @@ export enum BlogsSortListEnum {
 
 export enum PostsSortListEnum {
     Id = 'id',
-    Name = 'name',
-    Description = 'description',
-    WebsiteUrl = 'websiteUrl',
+    Title = 'title',
+    ShortDescription = 'shortDescription',
+    Content = 'content',
+    BlogId = 'blogId',
     CreatedAt = 'createdAt',
-    IsMembership = 'isMembership',
+    BlogName = 'blogName',
 };
