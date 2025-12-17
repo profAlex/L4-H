@@ -166,7 +166,7 @@ exports.dataRepository = {
     // *****************************
     // методы для управления блогами
     // *****************************
-    getAllBlogs() {
+    getSeveralBlogs(sentInputGetDriverQuery) {
         return __awaiter(this, void 0, void 0, function* () {
             // return __nonDisclosableDatabase.bloggerRepository.map(({ bloggerInfo }) => ({
             //     id: bloggerInfo.id,
@@ -174,15 +174,20 @@ exports.dataRepository = {
             //     description: bloggerInfo.description,
             //     websiteUrl: bloggerInfo.websiteUrl
             // }));
-            const tempContainer = yield mongo_db_1.bloggersCollection.find({}).toArray();
-            return tempContainer.map((value) => ({
-                id: value._id.toString(),
-                name: value.name,
-                description: value.description,
-                websiteUrl: value.websiteUrl,
-                createdAt: value.createdAt,
-                isMembership: false
-            }));
+            let tempDto;
+            const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize, } = sentInputGetDriverQuery;
+            const filter = {};
+            const skip = (pageNumber - 1) * pageSize;
+            // const tempContainer: bloggerCollectionStorageModel[]  = await bloggersCollection.find({}).toArray();
+            //
+            // return tempContainer.map((value: bloggerCollectionStorageModel) => ({
+            //     id: value._id.toString(),
+            //     name: value.name,
+            //     description: value.description,
+            //     websiteUrl: value.websiteUrl,
+            //     createdAt: value.createdAt,
+            //     isMembership: false
+            // }));
             // _id: ObjectId,
             // id: string;
             // name: string;
@@ -190,6 +195,24 @@ exports.dataRepository = {
             // websiteUrl: string;
             // createdAt: Date;
             // isMembership: boolean;
+            if (searchNameTerm) {
+                filter.push({ name: { $regex: searchNameTerm, $options: 'i' } });
+            }
+            if (!sortBy) {
+                throw new Error();
+            }
+            const items = yield mongo_db_1.bloggersCollection
+                .find(filter)
+                // "asc" (по возрастанию), то используется 1
+                // "desc" — то -1 для сортировки по убыванию. - по алфавиту от Я-А, Z-A
+                .sort({ [sortBy]: sortDirection })
+                // пропускаем определённое количество док. перед тем, как вернуть нужный набор данных.
+                .skip(skip)
+                // ограничивает количество возвращаемых документов до значения pageSize
+                .limit(pageSize)
+                .toArray();
+            const totalCount = yield mongo_db_1.bloggersCollection.countDocuments(filter);
+            return { items, totalCount };
         });
     },
     createNewBlog(newBlog) {
@@ -200,6 +223,29 @@ exports.dataRepository = {
             // __nonDisclosableDatabase.bloggerRepository.push(newDatabaseEntry);
             // console.log("ID Inside repository: ",newBlogEntry.id);
             return transformSingleBloggerCollectionToViewModel(newBlogEntry);
+        });
+    },
+    getSeveralPosts(sentBlogId, sent) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let tempDto;
+            const { sortBy, sortDirection, pageNumber, pageSize, } = sent;
+            const filter = {};
+            const skip = (pageNumber - 1) * pageSize;
+            if (!sortBy) {
+                throw new Error();
+            }
+            const items = yield mongo_db_1.postsCollection
+                .find({ id: sentBlogId })
+                // "asc" (по возрастанию), то используется 1
+                // "desc" — то -1 для сортировки по убыванию. - по алфавиту от Я-А, Z-A
+                .sort({ [sortBy]: sortDirection })
+                // пропускаем определённое количество док. перед тем, как вернуть нужный набор данных.
+                .skip(skip)
+                // ограничивает количество возвращаемых документов до значения pageSize
+                .limit(pageSize)
+                .toArray();
+            const totalCount = yield mongo_db_1.postsCollection.countDocuments({ id: sentBlogId });
+            return { items, totalCount };
         });
     },
     findSingleBlog(blogId) {

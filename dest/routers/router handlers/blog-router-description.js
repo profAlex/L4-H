@@ -9,19 +9,52 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBlog = exports.updateBlog = exports.findSingleBlog = exports.createNewBlog = exports.getAllBlogs = void 0;
+exports.deleteBlog = exports.updateBlog = exports.findSingleBlog = exports.getSeveralPostsFromBlog = exports.createNewBlog = exports.getSeveralBlogs = void 0;
 const http_statuses_1 = require("../../core/http-statuses");
 const blogger_mongodb_repository_1 = require("../../repository/blogger-mongodb-repository");
-const getAllBlogs = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    res.status(http_statuses_1.HttpStatus.Ok).json(yield blogger_mongodb_repository_1.dataRepository.getAllBlogs());
+const blogs_service_1 = require("../../service/blogs-service");
+const express_validator_1 = require("express-validator");
+const map_blog_search_to_view_model_1 = require("../mappers/map-blog-search-to-view-model");
+const getSeveralBlogs = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const sanitizedQuery = (0, express_validator_1.matchedData)(req, {
+        locations: ['query'],
+        includeOptionals: true,
+    }); //утилита для извечения трансформированных значений после валидатара
+    //в req.query остаются сырые квери параметры (строки)
+    const { items, totalCount } = yield blogs_service_1.blogsService.getSeveralBlogs(sanitizedQuery);
+    const driversListOutput = (0, map_blog_search_to_view_model_1.mapToBlogListPaginatedOutput)(items, {
+        pageNumber: sanitizedQuery.pageNumber,
+        pageSize: sanitizedQuery.pageSize,
+        totalCount,
+    });
+    res.status(http_statuses_1.HttpStatus.Ok).send(driversListOutput);
 });
-exports.getAllBlogs = getAllBlogs;
+exports.getSeveralBlogs = getSeveralBlogs;
 const createNewBlog = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    res.status(http_statuses_1.HttpStatus.Created).json(yield blogger_mongodb_repository_1.dataRepository.createNewBlog(req.body));
+    res.status(http_statuses_1.HttpStatus.Created).json(yield blogs_service_1.blogsService.createNewBlog(req.body));
 });
 exports.createNewBlog = createNewBlog;
+const getSeveralPostsFromBlog = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const sanitizedQuery = (0, express_validator_1.matchedData)(req, {
+        locations: ['query'],
+        includeOptionals: true,
+    }); //утилита для извечения трансформированных значений после валидатара
+    //в req.query остаются сырые квери параметры (строки)
+    const blogId = req.params.blogId;
+    if (!blogId) {
+        res.status(400).json({ error: 'blogId is required' });
+    }
+    const { items, totalCount } = yield blogs_service_1.blogsService.getAllPostsFromBlog(blogId, sanitizedQuery);
+    const driversListOutput = (0, map_blog_search_to_view_model_1.mapToPostListPaginatedOutput)(items, {
+        pageNumber: sanitizedQuery.pageNumber,
+        pageSize: sanitizedQuery.pageSize,
+        totalCount,
+    });
+    res.status(http_statuses_1.HttpStatus.Ok).send(driversListOutput);
+});
+exports.getSeveralPostsFromBlog = getSeveralPostsFromBlog;
 const findSingleBlog = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield blogger_mongodb_repository_1.dataRepository.findSingleBlog(req.params.id);
+    const result = yield blogs_service_1.blogsService.findSingleBlog(req.params.id);
     if (result === undefined) {
         res.sendStatus(http_statuses_1.HttpStatus.NotFound);
     }
@@ -29,7 +62,7 @@ const findSingleBlog = (req, res) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.findSingleBlog = findSingleBlog;
 const updateBlog = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield blogger_mongodb_repository_1.dataRepository.updateBlog(req.params.id, req.body);
+    const result = yield blogs_service_1.blogsService.updateBlog(req.params.id, req.body);
     if (result === undefined) {
         res.sendStatus(http_statuses_1.HttpStatus.NotFound);
     }

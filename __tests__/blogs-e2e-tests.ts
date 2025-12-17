@@ -89,7 +89,7 @@ describe("Test API for managing blogs(bloggers)", () =>{
     it("GET '/api/blogs/' - should respond with a list of bloggers (2 entries total)", async() => {
         const res = await request(testApp).get(`${BLOGS_PATH}/`);
 
-        const entriesCount = Object.keys(res.body).length;
+        const entriesCount = Object.values(res.body.items).length;
         expect(entriesCount).toBe(2);
 
         expect(res.status).toBe(HttpStatus.Ok);
