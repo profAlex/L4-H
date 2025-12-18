@@ -10,7 +10,10 @@ import {blogInputModelValidation} from "../validation/BlogInputModel-validation-
 import {inputErrorManagementMiddleware} from "../validation/error-management-validation-middleware";
 import {superAdminGuardMiddleware} from "../validation/base64-auth-guard_middleware";
 import {BlogsSortListEnum, PostsSortListEnum} from "./util-enums/fields-for-sorting";
-import {inputPaginationValidator} from "./blogs-validation-middleware/blog-pagination-validator";
+import {
+    inputPaginationValidator,
+    inputPaginationValidator2
+} from "./blogs-validation-middleware/blog-pagination-validator";
 import {inputBlogIdValidation} from "../validation/blogid-input-validation-middleware";
 import {
     blogRoutesPostInputModelValidation,
@@ -54,7 +57,7 @@ blogsRouter.get('/', inputPaginationValidator(BlogsSortListEnum), inputErrorMana
 // где обрабатывать массив errorMessages (который в функции inputErrorManagementMiddleware), где его органично выводить если он не пустой?
 blogsRouter.post('/', superAdminGuardMiddleware, blogInputModelValidation, inputErrorManagementMiddleware, createNewBlog); //auth guarded
 
-blogsRouter.get('/:blogId/posts', validateBlogId, inputPaginationValidator(PostsSortListEnum), inputErrorManagementMiddleware, getSeveralPostsFromBlog);
+blogsRouter.get('/:blogId/posts', validateBlogId, inputPaginationValidator2(PostsSortListEnum), inputErrorManagementMiddleware, getSeveralPostsFromBlog);
 blogsRouter.post('/:blogId/posts', superAdminGuardMiddleware, validateBlogId2, blogRoutesPostInputModelValidation, inputErrorManagementMiddleware, createNewBlogPost);
 
 blogsRouter.get('/:id', validateBlogId3, inputErrorManagementMiddleware, findSingleBlog);
