@@ -126,9 +126,8 @@ describe("Test API for managing blogs(bloggers)", () =>{
     });
 
 
-    it("GET '/blogs/blogId/posts - Returns all posts for specified blog - 2 total, with default fields check.", async() => {
+    it("GET '/blogs/blogId/posts - Returns all posts for specified blog without query parameters (defaulted to preset numbers) - returns 2 items, with fields check.", async() => {
         const res: Response = await request(testApp).get(`${BLOGS_PATH}/${blogId_1}/posts/`);
-        const entriesCount = Object.values(res.body.items).length;
 
         // {
         //     "pagesCount" : 1,
@@ -154,12 +153,12 @@ describe("Test API for managing blogs(bloggers)", () =>{
         //     } ]
         // }
 
-        expect(entriesCount).toBe(2);
-
         expect(res.body).toHaveProperty('pagesCount', 1);
         expect(res.body).toHaveProperty('page', 1);
         expect(res.body).toHaveProperty('pageSize', 10);
+        expect(res.body).toHaveProperty('totalCount', 2);
         expect(res.body).toHaveProperty('items');
+        expect(Array.isArray(res.body.items)).toBe(true);
 
         expect(res.body.items).toHaveLength(2);
 
@@ -184,6 +183,54 @@ describe("Test API for managing blogs(bloggers)", () =>{
 
         expect(res.status).toBe(HttpStatus.Ok);
         // console.log();
+    });
+
+
+    it("GET '/blogs/blogId/posts - Returns all posts for specified blog, with custom query parameters - returns 2 items, with fields check.", async() => {
+        const res: Response = await request(testApp).get(`${BLOGS_PATH}/${blogId_1}/posts/`).query({
+            pageNumber: 2,
+            sortDirection: 'asc',
+            sortBy: 'title',
+            pageSize: 1,
+        });
+
+        // {
+        //     "pagesCount" : 2,
+        //     "page" : 2,
+        //     "pageSize" : 1,
+        //     "totalCount" : 2,
+        //     "items" : [ {
+        //         "id" : "69445305fbce4a5c1941e70c",
+        //         "title" : "post blog 002",
+        //         "shortDescription" : "post ni o 4em",
+        //         "content" : "Eto testovoe napolnenie posta 001_002",
+        //         "blogId" : "69445305fbce4a5c1941e70a",
+        //         "blogName" : "blogger_001",
+        //         "createdAt" : "2025-12-18T19:16:21.790Z"
+        //     } ]
+        // }
+
+        expect(res.body).toHaveProperty('pagesCount', 2);
+        expect(res.body).toHaveProperty('page', 2);
+        expect(res.body).toHaveProperty('pageSize', 1);
+        expect(res.body).toHaveProperty('totalCount', 2);
+        expect(res.body).toHaveProperty('items');
+        expect(Array.isArray(res.body.items)).toBe(true);
+
+        expect(res.body.items).toHaveLength(1);
+
+        expect(res.body.items[0]).toHaveProperty('id');
+        expect(res.body.items[0]).toHaveProperty('title');
+        expect(res.body.items[0]).toHaveProperty('shortDescription');
+        expect(res.body.items[0]).toHaveProperty('content');
+        expect(res.body.items[0]).toHaveProperty('blogId');
+        expect(res.body.items[0]).toHaveProperty('blogName', 'blogger_001');
+        expect(res.body.items[0]).toHaveProperty('createdAt');
+
+        expect(res.body.items[0].blogId).toEqual(blogId_1);
+
+        expect(res.status).toBe(HttpStatus.Ok);
+        console.log();
     });
 
     it("POST '/api/blogs/' - should add a blog to the repository", async() => {

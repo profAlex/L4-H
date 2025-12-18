@@ -9,7 +9,15 @@ export const postsService = {
     },
 
     async createNewPost(newPost: PostInputModel): Promise<PostViewModel | undefined> {
-        return await dataRepository.createNewPost(newPost);
+        const result = await dataRepository.createNewPost(newPost);
+
+        if(result === undefined)
+        {
+            // res.sendStatus(HttpStatus.NotFound);
+            throw new Error(`couldn't create new post inside dataRepository.createNewPost`);
+        }
+
+        return result;
     },
 
     async findSinglePost(postId: string): Promise<PostViewModel | undefined> {
