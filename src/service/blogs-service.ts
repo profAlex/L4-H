@@ -7,6 +7,7 @@ import {dataRepository} from "../repository/blogger-mongodb-repository";
 import {InputGetBlogPostsByIdQuery} from "../routers/router-types/blog-search-by-id-input-model";
 import {PostViewModel} from "../routers/router-types/post-view-model";
 import {BlogInputModel} from "../routers/router-types/blog-input-model";
+import {PostInputModel} from "../routers/router-types/post-input-model";
 
 
 
@@ -19,6 +20,19 @@ export const blogsService = {
     async createNewBlog(newBlog: BlogInputModel) {
 
         return await dataRepository.createNewBlog(newBlog);
+    },
+
+    async createNewBlogPost(sentBlogId: string, newPost: PostInputModel): Promise<PostViewModel | undefined> {
+        const result = await dataRepository.createNewBlogPost(sentBlogId, newPost);
+
+        // if(result === undefined)
+        // {
+        //     // res.sendStatus(HttpStatus.NotFound);
+        //     console.error("Error creating new post");
+        //     throw new Error(`couldn't create new post inside dataRepository.createNewPost`);
+        // }
+
+        return result;
     },
 
     async getAllPostsFromBlog(sentBlogId:string, sentSanitizedQuery: InputGetBlogPostsByIdQuery): Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {

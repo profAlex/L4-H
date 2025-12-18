@@ -6,6 +6,7 @@ import {bloggersCollection, postsCollection} from "../db/mongo.db";
 import {ObjectId, WithId} from "mongodb";
 import {InputGetBlogsQuery} from "../routers/router-types/blog-search-input-model";
 import {InputGetBlogPostsByIdQuery} from "../routers/router-types/blog-search-by-id-input-model";
+import {BlogPostInputModel} from "../routers/router-types/blog-post-input-model";
 
 // type blogPost = {
 //     postId: string;
@@ -487,6 +488,73 @@ export const dataRepository = {
 
             }
         }
+        }
+        catch(error) {
+
+            console.error("UNKNOWN ERROR", error);
+            throw new Error("UNKNOWN ERROR");
+        }
+
+        return undefined;
+
+        // let blogName = this.findSingleBlog(newPost.blogId)?.name;
+        // if (!blogName)
+        // {
+        //     return undefined;
+        // }
+        //
+        // const blogIndex = __nonDisclosableDatabase.bloggerRepository.findIndex(
+        //     (blogger) => blogger.bloggerInfo.id === newPost.blogId
+        // );
+        //
+        // const newPostEntry = {
+        //     ...newPost,
+        //     id: generateCombinedId(),
+        //     blogName: blogName,
+        // };
+        //
+        // __nonDisclosableDatabase.bloggerRepository[blogIndex].bloggerPosts?.push(newPostEntry);
+        //
+        // return newPostEntry;
+    },
+
+
+    async createNewBlogPost(sentBlogId: string, newPost: BlogPostInputModel): Promise<PostViewModel | undefined> {
+        try {
+
+            if (ObjectId.isValid(sentBlogId))
+            {
+                const tempId = new ObjectId();
+                const relatedBlogger = await this.findSingleBlog(sentBlogId);
+
+                if (relatedBlogger){
+                    const newPostEntry = {
+                        _id: tempId,
+                        id: tempId.toString(),
+                        ...newPost,
+                        blogId: sentBlogId,
+                        blogName: relatedBlogger.name,
+                        createdAt: new Date()
+                    } as postCollectionStorageModel;
+
+                    // const test = transformSinglePostCollectionToViewModel(newPostEntry);
+                    //
+                    // if(test.title === "post blog 003") //== "Eto OBNOVLENNOE testovoe napolnenie posta 001_003"
+                    // {
+                    //     const propertyCount = Object.keys(test).length;
+                    //     console.log("LOOK HERE ------>", propertyCount);
+                    // }
+
+                    await postsCollection.insertOne(newPostEntry);
+
+                    //const propertyCount = Object.keys(newPostEntry).length;
+                    //console.log("LOOK HERE ------>", propertyCount);
+                    return transformSinglePostCollectionToViewModel(newPostEntry);
+
+                    // return test;
+
+                }
+            }
         }
         catch(error) {
 

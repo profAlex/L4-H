@@ -21,6 +21,8 @@ export const postsService = {
         return result;
     },
 
+
+
     async findSinglePost(postId: string): Promise<PostViewModel | undefined> {
         return await dataRepository.findSinglePost(postId);
     },

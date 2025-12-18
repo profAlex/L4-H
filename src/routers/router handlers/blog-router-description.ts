@@ -9,6 +9,7 @@ import {BlogViewModel} from "../router-types/blog-view-model";
 import {WithId} from "mongodb";
 import {mapToBlogListPaginatedOutput, mapToPostListPaginatedOutput} from "../mappers/map-blog-search-to-view-model";
 import {InputGetBlogPostsByIdQuery} from "../router-types/blog-search-by-id-input-model";
+import {postsService} from "../../service/posts-service";
 
 
 export const getSeveralBlogs = async (req: Request<{}, {}, {}, InputGetBlogsQuery>, res: Response) => {
@@ -63,6 +64,23 @@ export const getSeveralPostsFromBlog = async (req: Request<{blogId: string}, {},
 
     res.status(HttpStatus.Ok).send(driversListOutput);
 };
+
+
+export const createNewBlogPost= async (req:Request, res:Response) => {
+    const result = await blogsService.createNewBlogPost(req.params.blogId, req.body)
+
+    // if(result === undefined)
+    // {
+    //     // res.sendStatus(HttpStatus.NotFound);
+    //
+    //     res.status(HttpStatus.Created).json({ errorsMessages: "this is what ive been trying to find" });
+    //
+    //     throw new Error(`couldn't create new post inside postsService.createNewPost`);
+    // }
+
+    res.status(HttpStatus.Created).json(result);
+};
+
 
 export const findSingleBlog = async (req: Request, res: Response) => {
     const result = await blogsService.findSingleBlog(req.params.id);

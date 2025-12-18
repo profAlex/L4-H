@@ -9,6 +9,7 @@ import {HttpStatus} from "../src/core/http-statuses";
 import {bloggersCollection, closeDB, postsCollection, runDB} from "../src/db/mongo.db";
 import {ObjectId} from "mongodb";
 import {PostInputModel} from "../src/routers/router-types/post-input-model";
+import {BlogPostInputModel} from "../src/routers/router-types/blog-post-input-model";
 
 describe("Test API for managing blogs(bloggers)", () =>{
 
@@ -126,7 +127,7 @@ describe("Test API for managing blogs(bloggers)", () =>{
     });
 
 
-    it("GET '/blogs/blogId/posts - Returns all posts for specified blog without query parameters (defaulted to preset numbers) - returns 2 items, with fields check.", async() => {
+    it("GET '/api/blogs/blogId/posts - Returns all posts for specified blog without query parameters (defaulted to preset numbers) - returns 2 items, with fields check.", async() => {
         const res: Response = await request(testApp).get(`${BLOGS_PATH}/${blogId_1}/posts/`);
 
         // {
@@ -186,7 +187,7 @@ describe("Test API for managing blogs(bloggers)", () =>{
     });
 
 
-    it("GET '/blogs/blogId/posts - Returns all posts for specified blog, with custom query parameters - returns 2 items, with fields check.", async() => {
+    it("GET '/api/blogs/blogId/posts - Returns all posts for specified blog, with custom query parameters - returns 2 items, with fields check.", async() => {
         const res: Response = await request(testApp).get(`${BLOGS_PATH}/${blogId_1}/posts/`).query({
             pageNumber: 2,
             sortDirection: 'asc',
@@ -232,6 +233,43 @@ describe("Test API for managing blogs(bloggers)", () =>{
         expect(res.status).toBe(HttpStatus.Ok);
         console.log();
     });
+
+
+    it("POST '/api/blogs/blogId/posts' - should add a blog to the repository to specified blog with blogId", async() => {
+        expect(await dataRepository.returnBloggersAmount()).toBe(2);
+
+        const newPost_1: BlogPostInputModel = {
+            title: "post blog 003",
+            shortDescription: "otli4nii post",
+            content: "Eto testovoe napolnenie ewe odnogo novogo posta",
+        }
+
+        const res = await request(testApp).post(`${BLOGS_PATH}/${blogId_1}/posts/`).set('Authorization', 'Basic ' + 'YWRtaW46cXdlcnR5').send(newPost_1);
+
+        // {
+        //     "id": "6944763d0f22d56bf9e8535f",
+        //     "title": "post blog 003",
+        //     "shortDescription": "otli4nii post",
+        //     "content": "Eto testovoe napolnenie ewe odnogo novogo posta",
+        //     "blogId": "6944763c0f22d56bf9e85359",
+        //     "blogName": "blogger_001",
+        //     "createdAt": "2025-12-18T21:46:37.717Z"
+        // }
+
+        const propertyCount = Object.keys(res.body).length;
+        expect(propertyCount).toBe(7);
+
+        expect(res.body.id).toBeDefined();
+        expect(res.body).toHaveProperty('title', 'post blog 003');
+        expect(res.body).toHaveProperty('shortDescription', 'otli4nii post');
+        expect(res.body).toHaveProperty('content', 'Eto testovoe napolnenie ewe odnogo novogo posta');
+        expect(res.body).toHaveProperty('blogId');
+        expect(res.body).toHaveProperty('blogName', 'blogger_001');
+        expect(res.body).toHaveProperty('createdAt');
+
+        expect(res.status).toBe(HttpStatus.Created);
+    });
+
 
     it("POST '/api/blogs/' - should add a blog to the repository", async() => {
         expect(await dataRepository.returnBloggersAmount()).toBe(2);
@@ -365,61 +403,62 @@ describe("Test API for managing blogs(bloggers)", () =>{
         expect(anotherResults.status).toBe(HttpStatus.NotFound);
     });
 
-    it("", async () => {
+    it("Clears the database before quitting unit testing", async () => {
         const res = await request(testApp).delete(`${TESTING_PATH}/all-data`);
         expect(res.status).toBe(204);
     });
 
-    it("Creating test base entries, directly without endpoint calls", async () => {
-
-        const newBlog_1: BlogInputModel = {
-            name: "blogger_001",
-            description: "takoy sebe blogger...",
-            websiteUrl: "https://takoy.blogger.com",
-        }
-        const insertedBlog_1 = await dataRepository.createNewBlog(newBlog_1);
-        blogId_1 = insertedBlog_1.id;
-
-        const newPost_1: PostInputModel = {
-            title: "post blog 001",
-            shortDescription: "post ni o 4em",
-            content: "Eto testovoe napolnenie posta 001_001",
-            blogId: blogId_1,
-        }
-        await dataRepository.createNewPost(newPost_1);
-
-        const newPost_2 =    {
-            title: "post blog 002",
-            shortDescription: "post ni o 4em",
-            content: "Eto testovoe napolnenie posta 001_002",
-            blogId: blogId_1,
-        }
-        await dataRepository.createNewPost(newPost_2);
-
-        const newBlog_2: BlogInputModel = {
-            name: "blogger_002",
-            description: "a eto klassnii blogger!",
-            websiteUrl: "https://klassnii.blogger.com",
-        }
-        const insertedBlog_2 = await dataRepository.createNewBlog(newBlog_2);
-        blogId_2 = insertedBlog_2.id;
-
-        const newPost_3: PostInputModel = {
-            title: "post blog 001",
-            shortDescription: "horowii post",
-            content: "Eto testovoe napolnenie posta 002_001",
-            blogId: blogId_2,
-        }
-        await dataRepository.createNewPost(newPost_3);
-
-        const newPost_4: PostInputModel = {
-            title: "post blog 002",
-            shortDescription: "horowii post",
-            content: "Eto testovoe napolnenie posta 002_002",
-            blogId: blogId_2,
-        }
-        await dataRepository.createNewPost(newPost_4);
-    });
+    // // the following was done to test and visually see how data in mongo db are represented
+    // it("Creating test base entries, directly without endpoint calls", async () => {
+    //
+    //     const newBlog_1: BlogInputModel = {
+    //         name: "blogger_001",
+    //         description: "takoy sebe blogger...",
+    //         websiteUrl: "https://takoy.blogger.com",
+    //     }
+    //     const insertedBlog_1 = await dataRepository.createNewBlog(newBlog_1);
+    //     blogId_1 = insertedBlog_1.id;
+    //
+    //     const newPost_1: PostInputModel = {
+    //         title: "post blog 001",
+    //         shortDescription: "post ni o 4em",
+    //         content: "Eto testovoe napolnenie posta 001_001",
+    //         blogId: blogId_1,
+    //     }
+    //     await dataRepository.createNewPost(newPost_1);
+    //
+    //     const newPost_2 =    {
+    //         title: "post blog 002",
+    //         shortDescription: "post ni o 4em",
+    //         content: "Eto testovoe napolnenie posta 001_002",
+    //         blogId: blogId_1,
+    //     }
+    //     await dataRepository.createNewPost(newPost_2);
+    //
+    //     const newBlog_2: BlogInputModel = {
+    //         name: "blogger_002",
+    //         description: "a eto klassnii blogger!",
+    //         websiteUrl: "https://klassnii.blogger.com",
+    //     }
+    //     const insertedBlog_2 = await dataRepository.createNewBlog(newBlog_2);
+    //     blogId_2 = insertedBlog_2.id;
+    //
+    //     const newPost_3: PostInputModel = {
+    //         title: "post blog 001",
+    //         shortDescription: "horowii post",
+    //         content: "Eto testovoe napolnenie posta 002_001",
+    //         blogId: blogId_2,
+    //     }
+    //     await dataRepository.createNewPost(newPost_3);
+    //
+    //     const newPost_4: PostInputModel = {
+    //         title: "post blog 002",
+    //         shortDescription: "horowii post",
+    //         content: "Eto testovoe napolnenie posta 002_002",
+    //         blogId: blogId_2,
+    //     }
+    //     await dataRepository.createNewPost(newPost_4);
+    // });
 });
 
 

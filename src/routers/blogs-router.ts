@@ -1,6 +1,6 @@
 import {Request, Response, Router} from 'express';
 import {
-    createNewBlog,
+    createNewBlog, createNewBlogPost,
     deleteBlog,
     findSingleBlog,
     getSeveralBlogs, getSeveralPostsFromBlog,
@@ -16,7 +16,6 @@ import {
     blogRoutesPostInputModelValidation,
     postInputModelValidation
 } from "../validation/PostInputModel-validation-middleware";
-import {createNewPost} from "./router handlers/post-router-description";
 import {CollectionNames} from "../repository/collection-names";
 import {
     createIdValidator,
@@ -56,7 +55,7 @@ blogsRouter.get('/', inputPaginationValidator(BlogsSortListEnum), inputErrorMana
 blogsRouter.post('/', superAdminGuardMiddleware, blogInputModelValidation, inputErrorManagementMiddleware, createNewBlog); //auth guarded
 
 blogsRouter.get('/:blogId/posts', validateBlogId, inputPaginationValidator(PostsSortListEnum), inputErrorManagementMiddleware, getSeveralPostsFromBlog);
-blogsRouter.post('/:blogId/posts', superAdminGuardMiddleware, validateBlogId2, blogRoutesPostInputModelValidation, inputErrorManagementMiddleware, createNewPost);
+blogsRouter.post('/:blogId/posts', superAdminGuardMiddleware, validateBlogId2, blogRoutesPostInputModelValidation, inputErrorManagementMiddleware, createNewBlogPost);
 
 blogsRouter.get('/:id', validateBlogId3, inputErrorManagementMiddleware, findSingleBlog);
 // inputErrorManagementMiddleware два раза или один? проверить!

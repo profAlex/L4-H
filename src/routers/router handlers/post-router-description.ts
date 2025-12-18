@@ -23,6 +23,8 @@ export const createNewPost= async (req:Request, res:Response) => {
     res.status(HttpStatus.Created).json(result);
 };
 
+
+
 export const findSinglePost= async (req:Request, res:Response) => {
     const result = await postsService.findSinglePost(req.params.id);
 
