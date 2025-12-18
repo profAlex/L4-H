@@ -16,9 +16,10 @@ import {postInputModelValidation} from "../validation/PostInputModel-validation-
 import {createNewPost} from "./router handlers/post-router-description";
 import {CollectionNames} from "../repository/collection-names";
 import {
-    inputBlogIdValidationVerification, inputBlogIdValidationVerification2, inputIdValidationVerification,
-
+    createIdValidator,
 } from "../validation/id-verification-and-validation";
+import {InputGetBlogPostsByIdQuery} from "./router-types/blog-search-by-id-input-model";
+import {db} from "../db/mongo.db";
 // import {inputIdValidationVerification} from "../validation/id-input-validation-middleware";
 
 export const blogsRouter = Router();
@@ -28,17 +29,36 @@ export enum IdParamName {
     BlogId = 'blogId',
 }
 
+const validateBlogId = createIdValidator<'blogId', InputGetBlogPostsByIdQuery>({
+    paramKey: IdParamName.BlogId,
+    collectionName: CollectionNames.Blogs,
+    database: db,
+});
+
+const validateBlogId2 = createIdValidator({
+    paramKey: IdParamName.BlogId,
+    collectionName: CollectionNames.Blogs,
+    database: db,
+});
+
+const validateBlogId3 = createIdValidator({
+    paramKey: IdParamName.Id,
+    collectionName: CollectionNames.Blogs,
+    database: db,
+});
+
+
 blogsRouter.get('/', inputPaginationValidator(BlogsSortListEnum), inputErrorManagementMiddleware, getSeveralBlogs);
 // где обрабатывать массив errorMessages (который в функции inputErrorManagementMiddleware), где его органично выводить если он не пустой?
 blogsRouter.post('/', superAdminGuardMiddleware, blogInputModelValidation, inputErrorManagementMiddleware, createNewBlog); //auth guarded
 
-blogsRouter.get('/:blogId/posts', inputBlogIdValidationVerification(CollectionNames.Blogs), inputPaginationValidator(PostsSortListEnum), inputErrorManagementMiddleware, getSeveralPostsFromBlog);
-blogsRouter.post('/:blogId/posts', superAdminGuardMiddleware, inputBlogIdValidationVerification2(CollectionNames.Blogs), postInputModelValidation, inputErrorManagementMiddleware, createNewPost);
+blogsRouter.get('/:blogId/posts', validateBlogId, inputPaginationValidator(PostsSortListEnum), inputErrorManagementMiddleware, getSeveralPostsFromBlog);
+blogsRouter.post('/:blogId/posts', superAdminGuardMiddleware, validateBlogId2, postInputModelValidation, inputErrorManagementMiddleware, createNewPost);
 
-blogsRouter.get('/:id', inputIdValidationVerification(CollectionNames.Blogs), inputErrorManagementMiddleware, findSingleBlog);
+blogsRouter.get('/:id', validateBlogId3, inputErrorManagementMiddleware, findSingleBlog);
 // inputErrorManagementMiddleware два раза или один? проверить!
-blogsRouter.put('/:id', superAdminGuardMiddleware, inputIdValidationVerification(CollectionNames.Blogs), /*inputErrorManagementMiddleware,*/ blogInputModelValidation, inputErrorManagementMiddleware, updateBlog); //auth guarded
-blogsRouter.delete('/:id', superAdminGuardMiddleware, inputIdValidationVerification(CollectionNames.Blogs), inputErrorManagementMiddleware, deleteBlog); //auth guarded
+blogsRouter.put('/:id', superAdminGuardMiddleware, validateBlogId3, /*inputErrorManagementMiddleware,*/ blogInputModelValidation, inputErrorManagementMiddleware, updateBlog); //auth guarded
+blogsRouter.delete('/:id', superAdminGuardMiddleware, validateBlogId3, inputErrorManagementMiddleware, deleteBlog); //auth guarded
 
 
 

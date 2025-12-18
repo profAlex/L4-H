@@ -4,7 +4,7 @@ import {dataRepository} from "../src/repository/blogger-mongodb-repository";
 import request from "supertest";
 import {TESTING_PATH} from "../src/routers/router-pathes";
 import {HttpStatus} from "../src/core/http-statuses";
-import {runDB} from "../src/db/mongo.db";
+import {closeDB, runDB} from "../src/db/mongo.db";
 import {BlogInputModel} from "../src/routers/router-types/blog-input-model";
 import {PostInputModel} from "../src/routers/router-types/post-input-model";
 
@@ -21,6 +21,10 @@ describe("Test API commands for testing", () => {
         expect(res.status).toBe(HttpStatus.NoContent);
     });
 
+    afterAll(async () => {
+        // Закрываем после всех тестов
+        await closeDB();
+    });
 
     let blogId_1:string = '';
     let blogId_2:string = '';

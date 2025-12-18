@@ -6,7 +6,7 @@ import {BlogInputModel} from "../src/routers/router-types/blog-input-model";
 import {BLOGS_PATH, TESTING_PATH} from "../src/routers/router-pathes";
 import {bloggerCollectionStorageModel, dataRepository} from "../src/repository/blogger-mongodb-repository";
 import {HttpStatus} from "../src/core/http-statuses";
-import {bloggersCollection, postsCollection, runDB} from "../src/db/mongo.db";
+import {bloggersCollection, closeDB, postsCollection, runDB} from "../src/db/mongo.db";
 import {ObjectId} from "mongodb";
 import {PostInputModel} from "../src/routers/router-types/post-input-model";
 
@@ -31,6 +31,11 @@ describe("Test API for managing blogs(bloggers)", () =>{
 
         const res = await request(testApp).delete(`${TESTING_PATH}/all-data`);
         expect(res.status).toBe(204);
+    });
+
+    afterAll(async () => {
+        // Закрываем после всех тестов
+        await closeDB();
     });
 
     let blogId_1:string = '';
@@ -226,7 +231,7 @@ describe("Test API for managing blogs(bloggers)", () =>{
 
     it("GET '/api/blogs/{id}' - shouldn't be able to find anything because of non-existing id and return proper return-code", async() => {
         const res = await request(testApp).get(`${BLOGS_PATH}/aaaaa`);
-        expect(res.status).toBe(HttpStatus.NotFound);
+        expect(res.status).toBe(HttpStatus.BadRequest);
     });
 
     it("PUT '/api/blogs/{id}' - should correctly update a blog", async() => {
@@ -261,9 +266,9 @@ describe("Test API for managing blogs(bloggers)", () =>{
         };
 
         const res = await request(testApp).put(`${BLOGS_PATH}/0000`).set('Authorization', 'Basic ' + 'YWRtaW46cXdlcnR5').send(updatedBlogInput);
-        expect(res.status).toBe(HttpStatus.NotFound);
+        expect(res.status).toBe(HttpStatus.BadRequest);
 
-        console.log("test");
+        //console.log("test");
     });
 
     it("PUT '/api/blogs/{id}' - should give a proper error message to an incorrect login/password pair", async() => {

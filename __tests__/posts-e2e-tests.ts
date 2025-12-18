@@ -5,7 +5,7 @@ import {dataRepository} from "../src/repository/blogger-mongodb-repository";
 import request from "supertest";
 import {POSTS_PATH, TESTING_PATH} from "../src/routers/router-pathes";
 import {HttpStatus} from "../src/core/http-statuses";
-import {runDB} from "../src/db/mongo.db";
+import {closeDB, runDB} from "../src/db/mongo.db";
 import {BlogInputModel} from "../src/routers/router-types/blog-input-model";
 
 describe("Test API for managing posts inside blogs", () =>{
@@ -24,6 +24,10 @@ describe("Test API for managing posts inside blogs", () =>{
         expect(res.status).toBe(204);
     });
 
+    afterAll(async () => {
+        // Закрываем после всех тестов
+        await closeDB();
+    });
 
     it("", async () => {
         const res = await request(testApp).delete(`${TESTING_PATH}/all-data`);
@@ -194,7 +198,7 @@ describe("Test API for managing posts inside blogs", () =>{
     it("GET '/api/posts/{id}' - shouldn't be able to insert a post because of non-existent blog ID, should respond with proper error-return message", async() => {
 
         const res = await request(testApp).get(`${POSTS_PATH}/0000`);
-        expect(res.status).toBe(HttpStatus.NotFound);
+        expect(res.status).toBe(HttpStatus.BadRequest);
     });
 
     it("PUT '/api/posts/{id}' - should update a post", async() => {
