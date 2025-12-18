@@ -14,6 +14,7 @@ export const postsService = {
         if(result === undefined)
         {
             // res.sendStatus(HttpStatus.NotFound);
+            console.error("Error creating new post");
             throw new Error(`couldn't create new post inside dataRepository.createNewPost`);
         }
 

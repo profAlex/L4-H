@@ -452,6 +452,7 @@ export const dataRepository = {
 
 
     async createNewPost(newPost: PostInputModel): Promise<PostViewModel | undefined> {
+        try {
 
         if (ObjectId.isValid(newPost.blogId))
         {
@@ -485,6 +486,11 @@ export const dataRepository = {
                 // return test;
 
             }
+        }
+        }
+        catch(error) {
+
+            console.error("UNKNOWN ERROR", error);
         }
 
         return undefined;
