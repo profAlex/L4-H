@@ -11,12 +11,12 @@ export const postsService = {
     async createNewPost(newPost: PostInputModel): Promise<PostViewModel | undefined> {
         const result = await dataRepository.createNewPost(newPost);
 
-        if(result === undefined)
-        {
-            // res.sendStatus(HttpStatus.NotFound);
-            console.error("Error creating new post");
-            throw new Error(`couldn't create new post inside dataRepository.createNewPost`);
-        }
+        // if(result === undefined)
+        // {
+        //     // res.sendStatus(HttpStatus.NotFound);
+        //     console.error("Error creating new post");
+        //     throw new Error(`couldn't create new post inside dataRepository.createNewPost`);
+        // }
 
         return result;
     },

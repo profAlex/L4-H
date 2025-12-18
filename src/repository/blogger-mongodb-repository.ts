@@ -491,6 +491,7 @@ export const dataRepository = {
         catch(error) {
 
             console.error("UNKNOWN ERROR", error);
+            throw new Error("UNKNOWN ERROR");
         }
 
         return undefined;

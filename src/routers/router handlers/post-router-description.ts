@@ -11,14 +11,14 @@ export const getAllPosts= async (req:Request, res:Response) => {
 export const createNewPost= async (req:Request, res:Response) => {
     const result = await postsService.createNewPost(req.body)
 
-    if(result === undefined)
-    {
-        // res.sendStatus(HttpStatus.NotFound);
-
-        res.status(HttpStatus.Created).json({ errorsMessages: "this is what ive been trying to find" });
-
-        throw new Error(`couldn't create new post inside postsService.createNewPost`);
-    }
+    // if(result === undefined)
+    // {
+    //     // res.sendStatus(HttpStatus.NotFound);
+    //
+    //     res.status(HttpStatus.Created).json({ errorsMessages: "this is what ive been trying to find" });
+    //
+    //     throw new Error(`couldn't create new post inside postsService.createNewPost`);
+    // }
 
     res.status(HttpStatus.Created).json(result);
 };
