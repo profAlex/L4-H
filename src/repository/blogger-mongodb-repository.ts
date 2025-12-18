@@ -397,8 +397,11 @@ export const dataRepository = {
             const idToCheck = new ObjectId(blogId);
             const res = await bloggersCollection.deleteOne({_id: idToCheck});
 
+
+
             if(res.deletedCount === 1)
             {
+                await postsCollection.deleteMany({ blogId: blogId }); // Надо связанные посты удалять?????????????????
                 return null;
             }
         }

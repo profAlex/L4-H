@@ -87,7 +87,7 @@ export const updateBlog = async (req: Request, res: Response) => {
 };
 
 export const deleteBlog = async (req: Request, res: Response) => {
-    const result = await dataRepository.deleteBlog(req.params.id);
+    const result = await blogsService.deleteBlog(req.params.id);
 
     if(result === undefined)
     {

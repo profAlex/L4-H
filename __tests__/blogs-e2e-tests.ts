@@ -126,30 +126,7 @@ describe("Test API for managing blogs(bloggers)", () =>{
     });
 
 
-    it("GET '/blogs/blogId/posts - Returns all posts for specified blog - 2 total", async() => {
-        // const resTemp = await request(testApp).get(`${BLOGS_PATH}/`);
-        // // {
-        // //     "pagesCount" : 1,
-        // //     "page" : 1,
-        // //     "pageSize" : 10,
-        // //     "totalCount" : 2,
-        // //     "items" : [ {
-        // //         "id" : "69429c9a6fa871ce4ef2308c",
-        // //         "name" : "blogger_002",
-        // //         "description" : "a eto klassnii blogger!",
-        // //         "websiteUrl" : "https://klassnii.blogger.com",
-        // //         "createdAt" : "2025-12-17T12:05:46.324Z",
-        // //         "isMembership" : false
-        // //     }, {
-        // //         "id" : "69429c996fa871ce4ef23089",
-        // //         "name" : "blogger_001",
-        // //         "description" : "takoy sebe blogger...",
-        // //         "websiteUrl" : "https://takoy.blogger.com",
-        // //         "createdAt" : "2025-12-17T12:05:45.756Z",
-        // //         "isMembership" : false
-        // //     } ]
-        // // }
-
+    it("GET '/blogs/blogId/posts - Returns all posts for specified blog - 2 total, with default fields check.", async() => {
         const res: Response = await request(testApp).get(`${BLOGS_PATH}/${blogId_1}/posts/`);
         const entriesCount = Object.values(res.body.items).length;
 
@@ -178,6 +155,33 @@ describe("Test API for managing blogs(bloggers)", () =>{
         // }
 
         expect(entriesCount).toBe(2);
+
+        expect(res.body).toHaveProperty('pagesCount', 1);
+        expect(res.body).toHaveProperty('page', 1);
+        expect(res.body).toHaveProperty('pageSize', 10);
+        expect(res.body).toHaveProperty('items');
+
+        expect(res.body.items).toHaveLength(2);
+
+        expect(res.body.items[0]).toHaveProperty('id');
+        expect(res.body.items[0]).toHaveProperty('title');
+        expect(res.body.items[0]).toHaveProperty('shortDescription');
+        expect(res.body.items[0]).toHaveProperty('content');
+        expect(res.body.items[0]).toHaveProperty('blogId');
+        expect(res.body.items[0]).toHaveProperty('blogName');
+        expect(res.body.items[0]).toHaveProperty('createdAt');
+
+        expect(res.body.items[1]).toHaveProperty('id');
+        expect(res.body.items[1]).toHaveProperty('title');
+        expect(res.body.items[1]).toHaveProperty('shortDescription');
+        expect(res.body.items[1]).toHaveProperty('content');
+        expect(res.body.items[1]).toHaveProperty('blogId');
+        expect(res.body.items[1]).toHaveProperty('blogName');
+        expect(res.body.items[1]).toHaveProperty('createdAt');
+
+        expect(res.body.items[0].blogId).toEqual(blogId_1);
+        expect(res.body.items[1].blogId).toEqual(blogId_1);
+
         expect(res.status).toBe(HttpStatus.Ok);
         // console.log();
     });
