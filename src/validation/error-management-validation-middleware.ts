@@ -30,18 +30,18 @@ export const inputErrorManagementMiddleware = (
     if (errors.length > 0) {
         // console.log("WE GOT HERE FOR SOME REASON??");
         // console.log(errors); //для отладки, иначе непонятно где смотреть ошибки в случае их возникновения
-        if(errors[0].message.toLowerCase().includes('not found')) {
-            // console.log(errors[0].message);
-
-            res.status(HttpStatus.NotFound).json({ errorsMessages: errors });
-            //return;
-        }
-        else if (errors[0].message.toLowerCase().includes('invalid')) {
-            // console.log(errors[0].message);
-
-            res.status(HttpStatus.BadRequest).json({ errorsMessages: errors });
-            //return;
-        }
+        // if(errors[0].message.toLowerCase().includes('not found')) {
+        //     // console.log(errors[0].message);
+        //
+        //     res.status(HttpStatus.NotFound).json({ errorsMessages: errors });
+        //     //return;
+        // }
+        // else if (errors[0].message.toLowerCase().includes('invalid')) {
+        //     // console.log(errors[0].message);
+        //
+        //     res.status(HttpStatus.BadRequest).json({ errorsMessages: errors });
+        //     //return;
+        // }
 
         // console.log(errors[0].message);
 

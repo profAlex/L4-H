@@ -27,10 +27,18 @@ const blogIdValidation = body('blogId')
     .isString().withMessage('Incorrect blogId type (must be string)')
     .trim()
 
+
 export const postInputModelValidation = [
     // keyParamsAmountValidation,
     titleValidation,
     shortDescriptionValidation,
     contentValidation,
     blogIdValidation
+];
+
+export const blogRoutesPostInputModelValidation = [
+    // keyParamsAmountValidation,
+    titleValidation,
+    shortDescriptionValidation,
+    contentValidation,
 ];
