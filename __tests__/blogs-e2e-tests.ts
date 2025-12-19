@@ -231,7 +231,7 @@ describe("Test API for managing blogs(bloggers)", () =>{
         expect(res.body.items[0].blogId).toEqual(blogId_1);
 
         expect(res.status).toBe(HttpStatus.Ok);
-        console.log();
+        // console.log();
     });
 
 
@@ -287,8 +287,8 @@ describe("Test API for managing blogs(bloggers)", () =>{
         expect(res.body).toHaveProperty('description', 'norm takoy blog');
         expect(res.body).toHaveProperty('websiteUrl', 'https://mi-obrecheni.herokuapp.com/');
         expect(res.body).toHaveProperty('createdAt');
-        // expect(res.body).toHaveProperty('isMembership', false);
-        expect(res.body).toHaveProperty('isMembership', true);
+        expect(res.body).toHaveProperty('isMembership', false);
+        // expect(res.body).toHaveProperty('isMembership', true);
 
 
         expect(res.status).toBe(HttpStatus.Created);

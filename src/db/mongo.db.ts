@@ -44,7 +44,7 @@ export async function closeDB(){
         }
     }
     catch (error) {
-        console.error(error);
+        console.error('Error: ', error);
     }
 }
 
