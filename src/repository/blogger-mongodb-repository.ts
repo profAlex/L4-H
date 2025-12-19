@@ -168,7 +168,7 @@ const transformSingleBloggerCollectionToViewModel = (blogInContainer: bloggerCol
         description: blogInContainer.description,
         websiteUrl: blogInContainer.websiteUrl,
         createdAt: blogInContainer.createdAt,
-        isMembership: true // был false
+        isMembership: false // был false
     } as BlogViewModel;
 };
 
