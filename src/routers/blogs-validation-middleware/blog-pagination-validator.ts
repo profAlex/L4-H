@@ -37,9 +37,16 @@ export function inputPaginationValidator<T extends string>(
             .toInt(),
 
         query('searchNameTerm')
+            // .default(null)
+            // .isString()
+            // .withMessage('Invalid type of searchNameTerm field. Search terms must be a string')
             .default(null)
-            .isString()
-            .withMessage('Invalid type of searchNameTerm field. Search terms must be a string')
+            .custom(value => {
+                return value === null || typeof value === 'string';
+            })
+            .withMessage(
+                'Invalid type of searchNameTerm field. Search terms must be a string or null'
+            )
     ];
 }
 

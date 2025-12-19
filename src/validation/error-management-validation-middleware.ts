@@ -44,7 +44,7 @@ export const inputErrorManagementMiddleware = (
         // }
 
         // console.log(errors[0].message);
-
+        console.error(`Error ${HttpStatus.BadRequest}: ${errors[0]}`);
         res.status(HttpStatus.BadRequest).json({ errorsMessages: errors });
         //return;
     }
