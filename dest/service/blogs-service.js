@@ -12,9 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.blogsService = void 0;
 const blogger_mongodb_repository_1 = require("../repository/blogger-mongodb-repository");
 exports.blogsService = {
-    getSeveralBlogs(sentInputGetDriverQuery) {
+    getSeveralBlogs(sentInputGetBlogsQuery) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield blogger_mongodb_repository_1.dataRepository.getSeveralBlogs(sentInputGetDriverQuery);
+            return yield blogger_mongodb_repository_1.dataRepository.getSeveralBlogs(sentInputGetBlogsQuery);
         });
     },
     createNewBlog(newBlog) {
@@ -22,9 +22,21 @@ exports.blogsService = {
             return yield blogger_mongodb_repository_1.dataRepository.createNewBlog(newBlog);
         });
     },
-    getAllPostsFromBlog(sentBlogId, sent) {
+    createNewBlogPost(sentBlogId, newPost) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield blogger_mongodb_repository_1.dataRepository.getSeveralPosts(sentBlogId, sent);
+            const result = yield blogger_mongodb_repository_1.dataRepository.createNewBlogPost(sentBlogId, newPost);
+            // if(result === undefined)
+            // {
+            //     // res.sendStatus(HttpStatus.NotFound);
+            //     console.error("Error creating new post");
+            //     throw new Error(`couldn't create new post inside dataRepository.createNewPost`);
+            // }
+            return result;
+        });
+    },
+    getAllPostsFromBlog(sentBlogId, sentSanitizedQuery) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield blogger_mongodb_repository_1.dataRepository.getSeveralPostsById(sentBlogId, sentSanitizedQuery);
         });
     },
     findSingleBlog(blogId) {

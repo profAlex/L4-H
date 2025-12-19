@@ -1,11 +1,19 @@
 import {dataRepository, postCollectionStorageModel} from "../repository/blogger-mongodb-repository";
 import {PostViewModel} from "../routers/router-types/post-view-model";
 import {PostInputModel} from "../routers/router-types/post-input-model";
+import {InputGetPostsQuery} from "../routers/router-types/post-search-input-model";
+import {WithId} from "mongodb";
 
 export const postsService = {
 
-    async getAllPosts(): Promise <PostViewModel[] | []> {
-        return await dataRepository.getAllPosts();
+    // async getAllPosts(): Promise <PostViewModel[] | []> {
+    //     return await dataRepository.getAllPosts();
+    // },
+
+
+    async getSeveralPosts(sentInputGetPostsQuery: InputGetPostsQuery): Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
+
+        return await dataRepository.getSeveralPosts(sentInputGetPostsQuery);
     },
 
     async createNewPost(newPost: PostInputModel): Promise<PostViewModel | undefined> {

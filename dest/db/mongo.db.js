@@ -9,17 +9,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postsCollection = exports.bloggersCollection = exports.client = void 0;
+exports.db = exports.postsCollection = exports.bloggersCollection = exports.client = void 0;
 exports.runDB = runDB;
+exports.closeDB = closeDB;
 const mongodb_1 = require("mongodb");
 const DB_NAME = 'bloggers_db';
 const BLOGGERS_COLLECTION_NAME = 'bloggers_collection';
 const POSTS_COLLECTION_NAME = 'posts_collection';
 const URI = "mongodb+srv://admin:admin@learningcluster.f1zm90x.mongodb.net/?retryWrites=true&w=majority&appName=LearningCluster";
+let db = null;
+exports.db = db;
+exports.client = null;
 function runDB() {
     return __awaiter(this, void 0, void 0, function* () {
         exports.client = new mongodb_1.MongoClient(URI);
-        const db = exports.client.db(DB_NAME);
+        exports.db = db = exports.client.db(DB_NAME);
         exports.bloggersCollection = db.collection(BLOGGERS_COLLECTION_NAME);
         exports.postsCollection = db.collection(POSTS_COLLECTION_NAME);
         try {
@@ -30,6 +34,21 @@ function runDB() {
         catch (error) {
             yield exports.client.close();
             throw new Error(`Database not connected: ${error}`);
+        }
+    });
+}
+function closeDB() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (exports.client) {
+                yield exports.client.close();
+                console.log('🛑 MongoDB connection closed');
+                exports.client = null;
+                exports.db = db = null;
+            }
+        }
+        catch (error) {
+            console.error('Error: ', error);
         }
     });
 }

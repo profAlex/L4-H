@@ -3,7 +3,7 @@ import {
     createNewPost,
     deletePost,
     findSinglePost,
-    getAllPosts,
+    getSeveralPosts,
     updatePost
 } from "./router handlers/post-router-description";
 
@@ -14,6 +14,8 @@ import {IdParamName} from "./blogs-router";
 import {CollectionNames} from "../repository/collection-names";
 import {createIdValidator} from "../validation/id-verification-and-validation";
 import {db} from "../db/mongo.db";
+import {inputPaginationValidator2} from "./blogs-validation-middleware/blog-pagination-validator";
+import {PostsSortListEnum} from "./util-enums/fields-for-sorting";
 
 export const postsRouter = Router();
 
@@ -23,7 +25,7 @@ const validateBlogId4 = createIdValidator({
     database: db,
 });
 
-postsRouter.get('/', getAllPosts);
+postsRouter.get('/', inputPaginationValidator2(PostsSortListEnum), inputErrorManagementMiddleware, getSeveralPosts);
 // где обрабатывать массив errorMessages (который в функции inputErrorManagementMiddleware), где его органично выводить если он не пустой?
 postsRouter.post('/', superAdminGuardMiddleware, postInputModelValidation, inputErrorManagementMiddleware, createNewPost); //auth guarded
 postsRouter.get('/:id', validateBlogId4, inputErrorManagementMiddleware, findSinglePost);

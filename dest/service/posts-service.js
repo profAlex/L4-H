@@ -12,14 +12,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.postsService = void 0;
 const blogger_mongodb_repository_1 = require("../repository/blogger-mongodb-repository");
 exports.postsService = {
-    getAllPosts() {
+    // async getAllPosts(): Promise <PostViewModel[] | []> {
+    //     return await dataRepository.getAllPosts();
+    // },
+    getSeveralPosts(sentInputGetPostsQuery) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield blogger_mongodb_repository_1.dataRepository.getAllPosts();
+            return yield blogger_mongodb_repository_1.dataRepository.getSeveralPosts(sentInputGetPostsQuery);
         });
     },
     createNewPost(newPost) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield blogger_mongodb_repository_1.dataRepository.createNewPost(newPost);
+            const result = yield blogger_mongodb_repository_1.dataRepository.createNewPost(newPost);
+            // if(result === undefined)
+            // {
+            //     // res.sendStatus(HttpStatus.NotFound);
+            //     console.error("Error creating new post");
+            //     throw new Error(`couldn't create new post inside dataRepository.createNewPost`);
+            // }
+            return result;
         });
     },
     findSinglePost(postId) {

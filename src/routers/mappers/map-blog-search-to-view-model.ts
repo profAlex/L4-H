@@ -4,6 +4,7 @@ import {PaginatedBlogViewModel} from "../router-types/blog-paginated-view-model"
 import {PostViewModel} from "../router-types/post-view-model";
 import {PaginatedPostViewModel} from "../router-types/post-paginated-view-model";
 
+
 export function mapToBlogListPaginatedOutput(
     blogs: WithId<BlogViewModel>[],
     metaData: { pageNumber: number; pageSize: number; totalCount: number },

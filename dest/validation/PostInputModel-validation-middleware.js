@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postInputModelValidation = void 0;
+exports.blogRoutesPostInputModelValidation = exports.postInputModelValidation = void 0;
 const express_validator_1 = require("express-validator");
 // const keyParamsAmountValidation = body().custom((bodyData)=>{
 //     return Object.keys(bodyData).length === 4;
@@ -30,4 +30,10 @@ exports.postInputModelValidation = [
     shortDescriptionValidation,
     contentValidation,
     blogIdValidation
+];
+exports.blogRoutesPostInputModelValidation = [
+    // keyParamsAmountValidation,
+    titleValidation,
+    shortDescriptionValidation,
+    contentValidation,
 ];

@@ -125,7 +125,7 @@ const mongodb_1 = require("mongodb");
 //         createdAt: new Date()
 //     }
 // ];
-// А есть ли какой-либо смысл это оставлять? Нужна ли нам генерация уникального ID если мы используем айдишник монгодиби?
+// пока не используем
 const generateCombinedId = () => {
     const timestamp = Date.now();
     const random = Math.random().toString().substring(2, 5);
@@ -138,7 +138,7 @@ const transformSingleBloggerCollectionToViewModel = (blogInContainer) => {
         description: blogInContainer.description,
         websiteUrl: blogInContainer.websiteUrl,
         createdAt: blogInContainer.createdAt,
-        isMembership: false
+        isMembership: false // был false
     };
 };
 const transformSinglePostCollectionToViewModel = (postInContainer) => {
@@ -166,28 +166,11 @@ exports.dataRepository = {
     // *****************************
     // методы для управления блогами
     // *****************************
-    getSeveralBlogs(sentInputGetDriverQuery) {
+    getSeveralBlogs(sentInputGetBlogsQuery) {
         return __awaiter(this, void 0, void 0, function* () {
-            // return __nonDisclosableDatabase.bloggerRepository.map(({ bloggerInfo }) => ({
-            //     id: bloggerInfo.id,
-            //     name: bloggerInfo.name,
-            //     description: bloggerInfo.description,
-            //     websiteUrl: bloggerInfo.websiteUrl
-            // }));
-            let tempDto;
-            const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize, } = sentInputGetDriverQuery;
-            const filter = {};
+            const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize, } = sentInputGetBlogsQuery;
+            let filter = {};
             const skip = (pageNumber - 1) * pageSize;
-            // const tempContainer: bloggerCollectionStorageModel[]  = await bloggersCollection.find({}).toArray();
-            //
-            // return tempContainer.map((value: bloggerCollectionStorageModel) => ({
-            //     id: value._id.toString(),
-            //     name: value.name,
-            //     description: value.description,
-            //     websiteUrl: value.websiteUrl,
-            //     createdAt: value.createdAt,
-            //     isMembership: false
-            // }));
             // _id: ObjectId,
             // id: string;
             // name: string;
@@ -195,10 +178,27 @@ exports.dataRepository = {
             // websiteUrl: string;
             // createdAt: Date;
             // isMembership: boolean;
-            if (searchNameTerm) {
-                filter.push({ name: { $regex: searchNameTerm, $options: 'i' } });
+            try {
+                if (searchNameTerm && searchNameTerm.trim() !== '') {
+                    // Экранируем спецсимволы для безопасного $regex
+                    const escapedTerm = searchNameTerm
+                        .trim()
+                        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    filter = {
+                        $or: [
+                            { name: { $regex: escapedTerm, $options: 'i' } },
+                            { description: { $regex: escapedTerm, $options: 'i' } },
+                            { websiteUrl: { $regex: escapedTerm, $options: 'i' } },
+                        ],
+                    };
+                }
+                // console.log("<---------------WE GOT HERE??? 4");
+            }
+            catch (err) {
+                console.error("ERROR: ", err);
             }
             if (!sortBy) {
+                console.error("ERROR: sortBy is null or undefined inside dataRepository.getSeveralBlogs");
                 throw new Error();
             }
             const items = yield mongo_db_1.bloggersCollection
@@ -206,7 +206,7 @@ exports.dataRepository = {
                 // "asc" (по возрастанию), то используется 1
                 // "desc" — то -1 для сортировки по убыванию. - по алфавиту от Я-А, Z-A
                 .sort({ [sortBy]: sortDirection })
-                // пропускаем определённое количество док. перед тем, как вернуть нужный набор данных.
+                // пропускаем определённое количество документов перед тем, как вернуть нужный набор данных.
                 .skip(skip)
                 // ограничивает количество возвращаемых документов до значения pageSize
                 .limit(pageSize)
@@ -220,22 +220,19 @@ exports.dataRepository = {
             const tempId = new mongodb_1.ObjectId();
             const newBlogEntry = Object.assign(Object.assign({ _id: tempId, id: tempId.toString() }, newBlog), { createdAt: new Date(), isMembership: false });
             yield mongo_db_1.bloggersCollection.insertOne(newBlogEntry);
-            // __nonDisclosableDatabase.bloggerRepository.push(newDatabaseEntry);
-            // console.log("ID Inside repository: ",newBlogEntry.id);
             return transformSingleBloggerCollectionToViewModel(newBlogEntry);
         });
     },
-    getSeveralPosts(sentBlogId, sent) {
+    getSeveralPostsById(sentBlogId, sentSanitizedQuery) {
         return __awaiter(this, void 0, void 0, function* () {
-            let tempDto;
-            const { sortBy, sortDirection, pageNumber, pageSize, } = sent;
-            const filter = {};
+            const { sortBy, sortDirection, pageNumber, pageSize, } = sentSanitizedQuery;
             const skip = (pageNumber - 1) * pageSize;
             if (!sortBy) {
+                console.error("ERROR: sortBy is null or undefined inside dataRepository.getSeveralPostsById");
                 throw new Error();
             }
             const items = yield mongo_db_1.postsCollection
-                .find({ id: sentBlogId })
+                .find({ blogId: sentBlogId })
                 // "asc" (по возрастанию), то используется 1
                 // "desc" — то -1 для сортировки по убыванию. - по алфавиту от Я-А, Z-A
                 .sort({ [sortBy]: sortDirection })
@@ -244,7 +241,7 @@ exports.dataRepository = {
                 // ограничивает количество возвращаемых документов до значения pageSize
                 .limit(pageSize)
                 .toArray();
-            const totalCount = yield mongo_db_1.postsCollection.countDocuments({ id: sentBlogId });
+            const totalCount = yield mongo_db_1.postsCollection.countDocuments({ blogId: sentBlogId });
             return { items, totalCount };
         });
     },
@@ -305,6 +302,7 @@ exports.dataRepository = {
                 const idToCheck = new mongodb_1.ObjectId(blogId);
                 const res = yield mongo_db_1.bloggersCollection.deleteOne({ _id: idToCheck });
                 if (res.deletedCount === 1) {
+                    yield mongo_db_1.postsCollection.deleteMany({ blogId: blogId }); // Надо связанные посты удалять?????????????????
                     return null;
                 }
             }
@@ -348,49 +346,71 @@ exports.dataRepository = {
             // createdAt: Date;
         });
     },
+    getSeveralPosts(sentSanitizedQuery) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { sortBy, sortDirection, pageNumber, pageSize, } = sentSanitizedQuery;
+            const skip = (pageNumber - 1) * pageSize;
+            if (!sortBy) {
+                console.error("ERROR: sortBy is null or undefined inside dataRepository.getSeveralPosts");
+                throw new Error();
+            }
+            const items = yield mongo_db_1.postsCollection
+                .find({})
+                // "asc" (по возрастанию), то используется 1
+                // "desc" — то -1 для сортировки по убыванию. - по алфавиту от Я-А, Z-A
+                .sort({ [sortBy]: sortDirection })
+                // пропускаем определённое количество док. перед тем, как вернуть нужный набор данных.
+                .skip(skip)
+                // ограничивает количество возвращаемых документов до значения pageSize
+                .limit(pageSize)
+                .toArray();
+            const totalCount = yield mongo_db_1.postsCollection.countDocuments({});
+            return { items, totalCount };
+        });
+    },
     createNewPost(newPost) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (mongodb_1.ObjectId.isValid(newPost.blogId)) {
-                const tempId = new mongodb_1.ObjectId();
-                const relatedBlogger = yield this.findSingleBlog(newPost.blogId);
-                if (relatedBlogger) {
-                    const newPostEntry = Object.assign(Object.assign({ _id: tempId, id: tempId.toString() }, newPost), { 
-                        //blogId: newPost.blogId,
-                        blogName: relatedBlogger.name, createdAt: new Date() });
-                    // const test = transformSinglePostCollectionToViewModel(newPostEntry);
-                    //
-                    // if(test.title === "post blog 003") //== "Eto OBNOVLENNOE testovoe napolnenie posta 001_003"
-                    // {
-                    //     const propertyCount = Object.keys(test).length;
-                    //     console.log("LOOK HERE ------>", propertyCount);
-                    // }
-                    yield mongo_db_1.postsCollection.insertOne(newPostEntry);
-                    //const propertyCount = Object.keys(newPostEntry).length;
-                    //console.log("LOOK HERE ------>", propertyCount);
-                    return transformSinglePostCollectionToViewModel(newPostEntry);
-                    // return test;
+            try {
+                if (mongodb_1.ObjectId.isValid(newPost.blogId)) {
+                    const tempId = new mongodb_1.ObjectId();
+                    const relatedBlogger = yield this.findSingleBlog(newPost.blogId);
+                    if (relatedBlogger) {
+                        const newPostEntry = Object.assign(Object.assign({ _id: tempId, id: tempId.toString() }, newPost), { 
+                            //blogId: newPost.blogId,
+                            blogName: relatedBlogger.name, createdAt: new Date() });
+                        yield mongo_db_1.postsCollection.insertOne(newPostEntry);
+                        return transformSinglePostCollectionToViewModel(newPostEntry);
+                    }
                 }
             }
+            catch (error) {
+                console.error("Unknown error inside dataRepository.createNewPost: ", error);
+                throw new Error("Unknown error inside dataRepository.createNewPost");
+            }
             return undefined;
-            // let blogName = this.findSingleBlog(newPost.blogId)?.name;
-            // if (!blogName)
-            // {
-            //     return undefined;
-            // }
-            //
-            // const blogIndex = __nonDisclosableDatabase.bloggerRepository.findIndex(
-            //     (blogger) => blogger.bloggerInfo.id === newPost.blogId
-            // );
-            //
-            // const newPostEntry = {
-            //     ...newPost,
-            //     id: generateCombinedId(),
-            //     blogName: blogName,
-            // };
-            //
-            // __nonDisclosableDatabase.bloggerRepository[blogIndex].bloggerPosts?.push(newPostEntry);
-            //
-            // return newPostEntry;
+        });
+    },
+    createNewBlogPost(sentBlogId, newPost) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (mongodb_1.ObjectId.isValid(sentBlogId)) {
+                    const tempId = new mongodb_1.ObjectId();
+                    const relatedBlogger = yield this.findSingleBlog(sentBlogId);
+                    if (relatedBlogger) {
+                        const newPostEntry = Object.assign(Object.assign({ _id: tempId, id: tempId.toString() }, newPost), { blogId: sentBlogId, blogName: relatedBlogger.name, createdAt: new Date() });
+                        yield mongo_db_1.postsCollection.insertOne(newPostEntry);
+                        //const propertyCount = Object.keys(newPostEntry).length;
+                        //console.log("LOOK HERE ------>", propertyCount);
+                        return transformSinglePostCollectionToViewModel(newPostEntry);
+                        // return test;
+                    }
+                }
+            }
+            catch (error) {
+                console.error("Unknown error inside dataRepository.createNewBlogPost: ", error);
+                throw new Error("Unknown error inside dataRepository.createNewBlogPost");
+            }
+            return undefined;
         });
     },
     findSinglePost(postId) {
@@ -403,56 +423,10 @@ exports.dataRepository = {
                 }
             }
             return undefined;
-            // for (const blogger of __nonDisclosableDatabase.bloggerRepository) {
-            //     if (!blogger.bloggerPosts) continue;
-            //     for(const post of blogger.bloggerPosts)
-            //     {
-            //         if(post.id === postId)
-            //             return post;
-            //     }
-            // }
-            // return undefined;
         });
     },
     updatePost(postId, newData) {
         return __awaiter(this, void 0, void 0, function* () {
-            // const blogger = __nonDisclosableDatabase.bloggerRepository.find((blogger) => blogger.bloggerInfo.id === newData.blogId);
-            //
-            // if(blogger && blogger.bloggerPosts)
-            // {
-            //     let blogIndex = __nonDisclosableDatabase.bloggerRepository.indexOf(blogger);
-            //     let post = this.findSinglePost(postId);
-            //
-            //     if(blogIndex !== -1 && post) {
-            //         let postIndex = blogger.bloggerPosts.indexOf(post);
-            //
-            //         if(postIndex !== -1)
-            //         {
-            //             const updatedPost: PostViewModel = {
-            //                 id: post.id,
-            //                 blogName: post.blogName,
-            //                 ...newData
-            //             };
-            //
-            //             // Создаем новый массив постов с обновленным постом
-            //             const updatedPosts = [
-            //                 ...blogger.bloggerPosts.slice(0, postIndex),
-            //                 updatedPost,
-            //                 ...blogger.bloggerPosts.slice(postIndex + 1)
-            //             ];
-            //
-            //             // Создаем обновленную запись блоггера
-            //             const updatedBlogEntry: bloggerRawData = {
-            //                 ...blogger,
-            //                 bloggerPosts: updatedPosts
-            //             };
-            //
-            //
-            //                 __nonDisclosableDatabase.bloggerRepository[blogIndex] = updatedBlogEntry;
-            //             return null;
-            //         }
-            //     }
-            // }
             if (mongodb_1.ObjectId.isValid(postId)) {
                 const idToCheck = new mongodb_1.ObjectId(postId);
                 const res = yield mongo_db_1.postsCollection.updateOne({ _id: idToCheck }, { $set: Object.assign({}, newData) });
@@ -473,28 +447,6 @@ exports.dataRepository = {
                 }
             }
             return undefined;
-            // const post = this.findSinglePost(postId);
-            // if(!post)
-            // {
-            //     return undefined;
-            // }
-            //
-            // const blogIdFromPost = post.blogId;
-            // const blogger = __nonDisclosableDatabase.bloggerRepository.find((blogger) => blogger.bloggerInfo.id === blogIdFromPost);
-            //
-            // if(blogger && blogger.bloggerPosts)
-            // {
-            //     let blogIndex = __nonDisclosableDatabase.bloggerRepository.indexOf(blogger);
-            //
-            //     if(blogIndex !== -1 && post) {
-            //         let postIndex = blogger.bloggerPosts.indexOf(post);
-            //         __nonDisclosableDatabase.bloggerRepository[blogIndex].bloggerPosts?.splice(postIndex,1);
-            //
-            //         return null;
-            //     }
-            // }
-            //
-            // return undefined;
         });
     },
     // *****************************

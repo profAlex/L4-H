@@ -12,9 +12,9 @@ import {PostInputModel} from "../routers/router-types/post-input-model";
 
 
 export const blogsService = {
-    async getSeveralBlogs(sentInputGetDriverQuery: InputGetBlogsQuery): Promise<{items: WithId<BlogViewModel>[]; totalCount: number}> {
+    async getSeveralBlogs(sentInputGetBlogsQuery: InputGetBlogsQuery): Promise<{items: WithId<BlogViewModel>[]; totalCount: number}> {
 
-        return await dataRepository.getSeveralBlogs(sentInputGetDriverQuery);
+        return await dataRepository.getSeveralBlogs(sentInputGetBlogsQuery);
     },
 
     async createNewBlog(newBlog: BlogInputModel) {
@@ -37,7 +37,7 @@ export const blogsService = {
 
     async getAllPostsFromBlog(sentBlogId:string, sentSanitizedQuery: InputGetBlogPostsByIdQuery): Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
 
-        return await dataRepository.getSeveralPosts(sentBlogId, sentSanitizedQuery);
+        return await dataRepository.getSeveralPostsById(sentBlogId, sentSanitizedQuery);
     },
 
     async findSingleBlog(blogId: string): Promise<BlogViewModel | undefined> {

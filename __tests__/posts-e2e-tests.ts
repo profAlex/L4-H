@@ -110,24 +110,152 @@ describe("Test API for managing posts inside blogs", () =>{
 
 
 
-    it("GET '/api/posts/' - should respond with a list of posts (4 entries total)", async() => {
+    it("GET '/api/posts/' - checking response with empty query params request - should respond with a list of posts (4 post entries total)", async() => {
 
         expect(await dataRepository.returnBloggersAmount()).toBe(2);
 
         const res = await request(testApp).get(`${POSTS_PATH}/`);
 
+        // {
+        //     "pagesCount" : 1,
+        //     "page" : 1,
+        //     "pageSize" : 10,
+        //     "totalCount" : 4,
+        //     "items" : [{
+        //         "id" : "69456df44964d096c2cbfc2c",
+        //         "title" : "post blog 002",
+        //         "shortDescription" : "horowii post",
+        //         "content" : "Eto testovoe napolnenie posta 002_002",
+        //         "blogId" : "69456df34964d096c2cbfc2a",
+        //         "blogName" : "blogger_002",
+        //         "createdAt" : "2025-12-19T15:23:33.091Z"
+        //     }, {
+        //         "id" : "69456df44964d096c2cbfc2b",
+        //         "title" : "post blog 001",
+        //         "shortDescription" : "horowii post",
+        //         "content" : "Eto testovoe napolnenie posta 002_001",
+        //         "blogId" : "69456df34964d096c2cbfc2a",
+        //         "blogName" : "blogger_002",
+        //         "createdAt" : "2025-12-19T15:23:32.664Z"
+        //     }, {
+        //         "id" : "69456df34964d096c2cbfc29",
+        //         "title" : "post blog 002",
+        //         "shortDescription" : "post ni o 4em",
+        //         "content" : "Eto testovoe napolnenie posta 001_002",
+        //         "blogId" : "69456df24964d096c2cbfc27",
+        //         "blogName" : "blogger_001",
+        //         "createdAt" : "2025-12-19T15:23:31.694Z"
+        //     }, {
+        //         "id" : "69456df24964d096c2cbfc28",
+        //         "title" : "post blog 001",
+        //         "shortDescription" : "post ni o 4em",
+        //         "content" : "Eto testovoe napolnenie posta 001_001",
+        //         "blogId" : "69456df24964d096c2cbfc27",
+        //         "blogName" : "blogger_001",
+        //         "createdAt" : "2025-12-19T15:23:30.839Z"
+        //     } ]
+        // }
+
         const entriesCount = Object.entries(res.body).length;
-        expect(entriesCount).toBe(4);
+        expect(entriesCount).toBe(5);
+
+        expect(res.body).toHaveProperty('pagesCount', 1);
+        expect(res.body).toHaveProperty('page', 1);
+        expect(res.body).toHaveProperty('pageSize', 10);
+        expect(res.body).toHaveProperty('totalCount', 4);
+        expect(res.body).toHaveProperty('items');
+        expect(Array.isArray(res.body.items)).toBe(true);
+
+        expect(res.body.items).toHaveLength(4);
+
+        expect(res.body.items[0]).toHaveProperty('id');
+        expect(res.body.items[0]).toHaveProperty('title');
+        expect(res.body.items[0]).toHaveProperty('shortDescription');
+        expect(res.body.items[0]).toHaveProperty('content');
+        expect(res.body.items[0]).toHaveProperty('blogId');
+        expect(res.body.items[0]).toHaveProperty('blogName');
+        expect(res.body.items[0]).toHaveProperty('createdAt');
 
         expect(res.status).toBe(HttpStatus.Ok);
     });
 
-    // const correctPostInput: PostInputModel = {
-    //     title: "post blog 003",
-    //     shortDescription: "o4erednoy post ni o 4em",
-    //     content: "Eto testovoe napolnenie posta 001_003",
-    //     blogId: blogId_1
-    // };
+
+    it("GET '/api/posts/' - checking response with custom query params request - should respond with a list of posts (2 post entries total)", async() => {
+
+        expect(await dataRepository.returnBloggersAmount()).toBe(2);
+
+        const res = await request(testApp).get(`${POSTS_PATH}/`).query({
+            pageNumber: 2,
+            sortDirection: 'asc',
+            sortBy: 'title',
+            pageSize: 2,
+        });
+
+        // {
+        //     "pagesCount" : 2,
+        //     "page" : 2,
+        //     "pageSize" : 2,
+        //     "totalCount" : 4,
+        //     "items" : [ {
+        //         "id" : "694572bbaf6e391c3b116013",
+        //         "title" : "post blog 002",
+        //         "shortDescription" : "post ni o 4em",
+        //         "content" : "Eto testovoe napolnenie posta 001_002",
+        //         "blogId" : "694572bbaf6e391c3b116011",
+        //         "blogName" : "blogger_001",
+        //         "createdAt" : "2025-12-19T15:43:55.945Z"
+        //     }, {
+        //         "id" : "694572bcaf6e391c3b116016",
+        //         "title" : "post blog 002",
+        //         "shortDescription" : "horowii post",
+        //         "content" : "Eto testovoe napolnenie posta 002_002",
+        //         "blogId" : "694572bcaf6e391c3b116014",
+        //         "blogName" : "blogger_002",
+        //         "createdAt" : "2025-12-19T15:43:56.968Z"
+        //     } ]
+        // }
+
+        const entriesCount = Object.entries(res.body).length;
+        expect(entriesCount).toBe(5);
+
+        expect(res.body).toHaveProperty('pagesCount', 2);
+        expect(res.body).toHaveProperty('page', 2);
+        expect(res.body).toHaveProperty('pageSize', 2);
+        expect(res.body).toHaveProperty('totalCount', 4);
+        expect(res.body).toHaveProperty('items');
+        expect(Array.isArray(res.body.items)).toBe(true);
+
+        expect(res.body.items).toHaveLength(2);
+
+        expect(res.body.items[0]).toHaveProperty('id');
+        expect(res.body.items[0]).toHaveProperty('title');
+        expect(res.body.items[0]).toHaveProperty('shortDescription');
+        expect(res.body.items[0]).toHaveProperty('content');
+        expect(res.body.items[0]).toHaveProperty('blogId');
+        expect(res.body.items[0]).toHaveProperty('blogName');
+        expect(res.body.items[0]).toHaveProperty('createdAt');
+
+        expect(res.status).toBe(HttpStatus.Ok);
+    });
+
+
+    it("GET '/api/posts/' - checking response with broken/not allowed query params request - should respond with a list of posts (2 post entries total)", async() => {
+
+        expect(await dataRepository.returnBloggersAmount()).toBe(2);
+
+        const res = await request(testApp).get(`${POSTS_PATH}/`).query({
+            pageNumber: 'asd',
+            sortDirection: 'asc',
+            sortBy: 'title',
+            pageSize: 2,
+        });
+
+        // {"errorsMessages":[{"message":"Page number must be a positive integer","field":"pageNumber"}]}
+
+        expect(res.status).toBe(HttpStatus.BadRequest);
+        console.log();
+    });
+
 
     it("POST '/api/posts/' - should add a post to the repository", async() => {
         // удивительно, но этот объект не видно изнутри! если объявить его снаружи, он не отправится
@@ -270,54 +398,54 @@ describe("Test API for managing posts inside blogs", () =>{
     });
 
 
-    it("Creating test base entries, directly without endpoint calls", async () => {
-
-        const newBlog_1: BlogInputModel = {
-            name: "blogger_001",
-            description: "takoy sebe blogger...",
-            websiteUrl: "https://takoy.blogger.com",
-        }
-        const insertedBlog_1 = await dataRepository.createNewBlog(newBlog_1);
-        blogId_1 = insertedBlog_1.id;
-
-        const newPost_1: PostInputModel = {
-            title: "post blog 001",
-            shortDescription: "post ni o 4em",
-            content: "Eto testovoe napolnenie posta 001_001",
-            blogId: blogId_1,
-        }
-        await dataRepository.createNewPost(newPost_1);
-
-        const newPost_2 =    {
-            title: "post blog 002",
-            shortDescription: "post ni o 4em",
-            content: "Eto testovoe napolnenie posta 001_002",
-            blogId: blogId_1,
-        }
-        await dataRepository.createNewPost(newPost_2);
-
-        const newBlog_2: BlogInputModel = {
-            name: "blogger_002",
-            description: "a eto klassnii blogger!",
-            websiteUrl: "https://klassnii.blogger.com",
-        }
-        const insertedBlog_2 = await dataRepository.createNewBlog(newBlog_2);
-        blogId_2 = insertedBlog_2.id;
-
-        const newPost_3: PostInputModel = {
-            title: "post blog 001",
-            shortDescription: "horowii post",
-            content: "Eto testovoe napolnenie posta 002_001",
-            blogId: blogId_2,
-        }
-        await dataRepository.createNewPost(newPost_3);
-
-        const newPost_4: PostInputModel = {
-            title: "post blog 002",
-            shortDescription: "horowii post",
-            content: "Eto testovoe napolnenie posta 002_002",
-            blogId: blogId_2,
-        }
-        await dataRepository.createNewPost(newPost_4);
-    });
+    // it("Creating test base entries, directly without endpoint calls", async () => {
+    //
+    //     const newBlog_1: BlogInputModel = {
+    //         name: "blogger_001",
+    //         description: "takoy sebe blogger...",
+    //         websiteUrl: "https://takoy.blogger.com",
+    //     }
+    //     const insertedBlog_1 = await dataRepository.createNewBlog(newBlog_1);
+    //     blogId_1 = insertedBlog_1.id;
+    //
+    //     const newPost_1: PostInputModel = {
+    //         title: "post blog 001",
+    //         shortDescription: "post ni o 4em",
+    //         content: "Eto testovoe napolnenie posta 001_001",
+    //         blogId: blogId_1,
+    //     }
+    //     await dataRepository.createNewPost(newPost_1);
+    //
+    //     const newPost_2 =    {
+    //         title: "post blog 002",
+    //         shortDescription: "post ni o 4em",
+    //         content: "Eto testovoe napolnenie posta 001_002",
+    //         blogId: blogId_1,
+    //     }
+    //     await dataRepository.createNewPost(newPost_2);
+    //
+    //     const newBlog_2: BlogInputModel = {
+    //         name: "blogger_002",
+    //         description: "a eto klassnii blogger!",
+    //         websiteUrl: "https://klassnii.blogger.com",
+    //     }
+    //     const insertedBlog_2 = await dataRepository.createNewBlog(newBlog_2);
+    //     blogId_2 = insertedBlog_2.id;
+    //
+    //     const newPost_3: PostInputModel = {
+    //         title: "post blog 001",
+    //         shortDescription: "horowii post",
+    //         content: "Eto testovoe napolnenie posta 002_001",
+    //         blogId: blogId_2,
+    //     }
+    //     await dataRepository.createNewPost(newPost_3);
+    //
+    //     const newPost_4: PostInputModel = {
+    //         title: "post blog 002",
+    //         shortDescription: "horowii post",
+    //         content: "Eto testovoe napolnenie posta 002_002",
+    //         blogId: blogId_2,
+    //     }
+    //     await dataRepository.createNewPost(newPost_4);
+    // });
 });

@@ -8,3 +8,4 @@ export type InputGetBlogsQuery = {
     pageNumber: number;
     pageSize: number;
 }
+

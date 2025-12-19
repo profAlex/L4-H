@@ -8,12 +8,6 @@ import {InputGetBlogsQuery} from "../routers/router-types/blog-search-input-mode
 import {InputGetBlogPostsByIdQuery} from "../routers/router-types/blog-search-by-id-input-model";
 import {BlogPostInputModel} from "../routers/router-types/blog-post-input-model";
 
-// type blogPost = {
-//     postId: string;
-//     postTitle: string;
-//     postShortDescription: string;
-//     postContent: string;
-// };
 
 export type bloggerCollectionStorageModel= {
     _id: ObjectId,
@@ -154,7 +148,7 @@ export type postCollectionStorageModel = {
 //     }
 // ];
 
-// А есть ли какой-либо смысл это оставлять? Нужна ли нам генерация уникального ID если мы используем айдишник монгодиби?
+// пока не используем
 const generateCombinedId = () => {
     const timestamp = Date.now();
     const random = Math.random().toString().substring(2,5);
@@ -184,49 +178,32 @@ const transformSinglePostCollectionToViewModel = (postInContainer: postCollectio
     } as PostViewModel;
 };
 
+
 async function findBlogByPrimaryKey(id: ObjectId): Promise<bloggerCollectionStorageModel | null> {
     return bloggersCollection.findOne({ _id: id });
 }
+
 
 async function findPostByPrimaryKey(id: ObjectId): Promise<postCollectionStorageModel | null> {
     return postsCollection.findOne({ _id: id });
 }
 
-export const dataRepository = {
 
+export const dataRepository = {
     // *****************************
     // методы для управления блогами
     // *****************************
-    async getSeveralBlogs(sentInputGetDriverQuery: InputGetBlogsQuery) : Promise<{items: WithId<BlogViewModel>[]; totalCount: number}> {
-        // return __nonDisclosableDatabase.bloggerRepository.map(({ bloggerInfo }) => ({
-        //     id: bloggerInfo.id,
-        //     name: bloggerInfo.name,
-        //     description: bloggerInfo.description,
-        //     websiteUrl: bloggerInfo.websiteUrl
-        // }));
-
-        let tempDto;
+    async getSeveralBlogs(sentInputGetBlogsQuery: InputGetBlogsQuery) : Promise<{items: WithId<BlogViewModel>[]; totalCount: number}> {
         const {
             searchNameTerm,
             sortBy,
             sortDirection,
             pageNumber,
             pageSize,
-        } = sentInputGetDriverQuery;
+        } = sentInputGetBlogsQuery;
 
-        const filter :any = {};
+        let filter :any = {};
         const skip = (pageNumber - 1) * pageSize;
-
-        // const tempContainer: bloggerCollectionStorageModel[]  = await bloggersCollection.find({}).toArray();
-        //
-        // return tempContainer.map((value: bloggerCollectionStorageModel) => ({
-        //     id: value._id.toString(),
-        //     name: value.name,
-        //     description: value.description,
-        //     websiteUrl: value.websiteUrl,
-        //     createdAt: value.createdAt,
-        //     isMembership: false
-        // }));
 
         // _id: ObjectId,
         // id: string;
@@ -236,12 +213,30 @@ export const dataRepository = {
         // createdAt: Date;
         // isMembership: boolean;
 
-        if(searchNameTerm)
-        {
-            filter.push({ name: { $regex: searchNameTerm, $options: 'i' } });
+        try{
+
+            if (searchNameTerm && searchNameTerm.trim() !== '') {
+                // Экранируем спецсимволы для безопасного $regex
+                const escapedTerm = searchNameTerm
+                    .trim()
+                    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+                filter = {
+                    $or: [
+                        { name: { $regex: escapedTerm, $options: 'i' } },
+                        { description: { $regex: escapedTerm, $options: 'i' } },
+                        { websiteUrl: { $regex: escapedTerm, $options: 'i' } },
+                    ],
+                };
+            }
+            // console.log("<---------------WE GOT HERE??? 4");
+        }
+        catch(err){
+            console.error("ERROR: ", err)
         }
 
         if(!sortBy) {
+            console.error("ERROR: sortBy is null or undefined inside dataRepository.getSeveralBlogs");
             throw new Error();
         }
 
@@ -252,7 +247,7 @@ export const dataRepository = {
             // "desc" — то -1 для сортировки по убыванию. - по алфавиту от Я-А, Z-A
             .sort({[sortBy]: sortDirection})
 
-            // пропускаем определённое количество док. перед тем, как вернуть нужный набор данных.
+            // пропускаем определённое количество документов перед тем, как вернуть нужный набор данных.
             .skip(skip)
 
             // ограничивает количество возвращаемых документов до значения pageSize
@@ -277,14 +272,11 @@ export const dataRepository = {
 
         await bloggersCollection.insertOne(newBlogEntry);
 
-        // __nonDisclosableDatabase.bloggerRepository.push(newDatabaseEntry);
-
-        // console.log("ID Inside repository: ",newBlogEntry.id);
         return transformSingleBloggerCollectionToViewModel(newBlogEntry);
     },
 
-    async getSeveralPosts(sentBlogId:string, sentSanitizedQuery: InputGetBlogPostsByIdQuery) : Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
-        let tempDto;
+
+    async getSeveralPostsById(sentBlogId:string, sentSanitizedQuery: InputGetBlogPostsByIdQuery) : Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
         const {
             sortBy,
             sortDirection,
@@ -292,18 +284,10 @@ export const dataRepository = {
             pageSize,
         } = sentSanitizedQuery;
 
-        // console.log('<------------HAVE WE GOT HERE_2 ????');
-        // console.log(`sortBy: ${sortBy}`);
-        // console.log(`sortDirection: ${sortDirection}`);
-        // console.log(`pageNumber: ${pageNumber}`);
-        // console.log(`pageSize: ${pageSize}`);
-        //
-        // console.log(sentBlogId);
-
-        const filter :any = {};
         const skip = (pageNumber - 1) * pageSize;
 
         if(!sortBy) {
+            console.error("ERROR: sortBy is null or undefined inside dataRepository.getSeveralPostsById");
             throw new Error();
         }
 
@@ -325,6 +309,7 @@ export const dataRepository = {
 
         return {items, totalCount};
     },
+
 
     async findSingleBlog(blogId: string): Promise<BlogViewModel | undefined> {
 
@@ -452,70 +437,72 @@ export const dataRepository = {
     },
 
 
+    async getSeveralPosts(sentSanitizedQuery: InputGetBlogPostsByIdQuery) : Promise<{items: WithId<PostViewModel>[]; totalCount: number}> {
+        const {
+            sortBy,
+            sortDirection,
+            pageNumber,
+            pageSize,
+        } = sentSanitizedQuery;
+
+        const skip = (pageNumber - 1) * pageSize;
+
+        if(!sortBy) {
+            console.error("ERROR: sortBy is null or undefined inside dataRepository.getSeveralPosts");
+            throw new Error();
+        }
+
+        const items = await postsCollection
+            .find({})
+
+            // "asc" (по возрастанию), то используется 1
+            // "desc" — то -1 для сортировки по убыванию. - по алфавиту от Я-А, Z-A
+            .sort({[sortBy]: sortDirection})
+
+            // пропускаем определённое количество док. перед тем, как вернуть нужный набор данных.
+            .skip(skip)
+
+            // ограничивает количество возвращаемых документов до значения pageSize
+            .limit(pageSize)
+            .toArray();
+
+        const totalCount = await postsCollection.countDocuments({});
+
+        return {items, totalCount};
+    },
+
+
     async createNewPost(newPost: PostInputModel): Promise<PostViewModel | undefined> {
         try {
 
-        if (ObjectId.isValid(newPost.blogId))
-        {
-            const tempId = new ObjectId();
-            const relatedBlogger = await this.findSingleBlog(newPost.blogId);
+            if (ObjectId.isValid(newPost.blogId))
+            {
+                const tempId = new ObjectId();
+                const relatedBlogger = await this.findSingleBlog(newPost.blogId);
 
-            if (relatedBlogger){
-                const newPostEntry = {
-                    _id: tempId,
-                    id: tempId.toString(),
-                    ...newPost,
-                    //blogId: newPost.blogId,
-                    blogName: relatedBlogger.name,
-                    createdAt: new Date()
-                } as postCollectionStorageModel;
+                if (relatedBlogger){
+                    const newPostEntry = {
+                        _id: tempId,
+                        id: tempId.toString(),
+                        ...newPost,
+                        //blogId: newPost.blogId,
+                        blogName: relatedBlogger.name,
+                        createdAt: new Date()
+                    } as postCollectionStorageModel;
 
-                // const test = transformSinglePostCollectionToViewModel(newPostEntry);
-                //
-                // if(test.title === "post blog 003") //== "Eto OBNOVLENNOE testovoe napolnenie posta 001_003"
-                // {
-                //     const propertyCount = Object.keys(test).length;
-                //     console.log("LOOK HERE ------>", propertyCount);
-                // }
+                    await postsCollection.insertOne(newPostEntry);
 
-                await postsCollection.insertOne(newPostEntry);
-
-                //const propertyCount = Object.keys(newPostEntry).length;
-                //console.log("LOOK HERE ------>", propertyCount);
-                return transformSinglePostCollectionToViewModel(newPostEntry);
-
-                // return test;
-
+                    return transformSinglePostCollectionToViewModel(newPostEntry);
+                }
             }
         }
-        }
         catch(error) {
-
-            console.error("UNKNOWN ERROR", error);
-            throw new Error("UNKNOWN ERROR");
+            console.error("Unknown error inside dataRepository.createNewPost: ", error);
+            throw new Error("Unknown error inside dataRepository.createNewPost");
         }
 
         return undefined;
 
-        // let blogName = this.findSingleBlog(newPost.blogId)?.name;
-        // if (!blogName)
-        // {
-        //     return undefined;
-        // }
-        //
-        // const blogIndex = __nonDisclosableDatabase.bloggerRepository.findIndex(
-        //     (blogger) => blogger.bloggerInfo.id === newPost.blogId
-        // );
-        //
-        // const newPostEntry = {
-        //     ...newPost,
-        //     id: generateCombinedId(),
-        //     blogName: blogName,
-        // };
-        //
-        // __nonDisclosableDatabase.bloggerRepository[blogIndex].bloggerPosts?.push(newPostEntry);
-        //
-        // return newPostEntry;
     },
 
 
@@ -537,14 +524,6 @@ export const dataRepository = {
                         createdAt: new Date()
                     } as postCollectionStorageModel;
 
-                    // const test = transformSinglePostCollectionToViewModel(newPostEntry);
-                    //
-                    // if(test.title === "post blog 003") //== "Eto OBNOVLENNOE testovoe napolnenie posta 001_003"
-                    // {
-                    //     const propertyCount = Object.keys(test).length;
-                    //     console.log("LOOK HERE ------>", propertyCount);
-                    // }
-
                     await postsCollection.insertOne(newPostEntry);
 
                     //const propertyCount = Object.keys(newPostEntry).length;
@@ -557,33 +536,13 @@ export const dataRepository = {
             }
         }
         catch(error) {
-
-            console.error("UNKNOWN ERROR", error);
-            throw new Error("UNKNOWN ERROR");
+            console.error("Unknown error inside dataRepository.createNewBlogPost: ", error);
+            throw new Error("Unknown error inside dataRepository.createNewBlogPost");
         }
 
         return undefined;
-
-        // let blogName = this.findSingleBlog(newPost.blogId)?.name;
-        // if (!blogName)
-        // {
-        //     return undefined;
-        // }
-        //
-        // const blogIndex = __nonDisclosableDatabase.bloggerRepository.findIndex(
-        //     (blogger) => blogger.bloggerInfo.id === newPost.blogId
-        // );
-        //
-        // const newPostEntry = {
-        //     ...newPost,
-        //     id: generateCombinedId(),
-        //     blogName: blogName,
-        // };
-        //
-        // __nonDisclosableDatabase.bloggerRepository[blogIndex].bloggerPosts?.push(newPostEntry);
-        //
-        // return newPostEntry;
     },
+
 
     async findSinglePost(postId: string): Promise<PostViewModel | undefined> {
         if (ObjectId.isValid(postId)) {
@@ -598,58 +557,10 @@ export const dataRepository = {
         }
 
         return undefined;
-
-        // for (const blogger of __nonDisclosableDatabase.bloggerRepository) {
-        //     if (!blogger.bloggerPosts) continue;
-        //     for(const post of blogger.bloggerPosts)
-        //     {
-        //         if(post.id === postId)
-        //             return post;
-        //     }
-        // }
-        // return undefined;
     },
 
+
     async updatePost(postId: string, newData: PostInputModel): Promise<null | undefined> {
-
-        // const blogger = __nonDisclosableDatabase.bloggerRepository.find((blogger) => blogger.bloggerInfo.id === newData.blogId);
-        //
-        // if(blogger && blogger.bloggerPosts)
-        // {
-        //     let blogIndex = __nonDisclosableDatabase.bloggerRepository.indexOf(blogger);
-        //     let post = this.findSinglePost(postId);
-        //
-        //     if(blogIndex !== -1 && post) {
-        //         let postIndex = blogger.bloggerPosts.indexOf(post);
-        //
-        //         if(postIndex !== -1)
-        //         {
-        //             const updatedPost: PostViewModel = {
-        //                 id: post.id,
-        //                 blogName: post.blogName,
-        //                 ...newData
-        //             };
-        //
-        //             // Создаем новый массив постов с обновленным постом
-        //             const updatedPosts = [
-        //                 ...blogger.bloggerPosts.slice(0, postIndex),
-        //                 updatedPost,
-        //                 ...blogger.bloggerPosts.slice(postIndex + 1)
-        //             ];
-        //
-        //             // Создаем обновленную запись блоггера
-        //             const updatedBlogEntry: bloggerRawData = {
-        //                 ...blogger,
-        //                 bloggerPosts: updatedPosts
-        //             };
-        //
-        //
-        //                 __nonDisclosableDatabase.bloggerRepository[blogIndex] = updatedBlogEntry;
-        //             return null;
-        //         }
-        //     }
-        // }
-
 
         if (ObjectId.isValid(postId)) {
 
@@ -667,6 +578,7 @@ export const dataRepository = {
         return undefined;
     },
 
+
     async deletePost(postId: string): Promise<null | undefined> {
 
         if (ObjectId.isValid(postId)) {
@@ -680,30 +592,8 @@ export const dataRepository = {
         }
 
         return undefined;
-
-        // const post = this.findSinglePost(postId);
-        // if(!post)
-        // {
-        //     return undefined;
-        // }
-        //
-        // const blogIdFromPost = post.blogId;
-        // const blogger = __nonDisclosableDatabase.bloggerRepository.find((blogger) => blogger.bloggerInfo.id === blogIdFromPost);
-        //
-        // if(blogger && blogger.bloggerPosts)
-        // {
-        //     let blogIndex = __nonDisclosableDatabase.bloggerRepository.indexOf(blogger);
-        //
-        //     if(blogIndex !== -1 && post) {
-        //         let postIndex = blogger.bloggerPosts.indexOf(post);
-        //         __nonDisclosableDatabase.bloggerRepository[blogIndex].bloggerPosts?.splice(postIndex,1);
-        //
-        //         return null;
-        //     }
-        // }
-        //
-        // return undefined;
     },
+
 
     // *****************************
     // методы для тестов

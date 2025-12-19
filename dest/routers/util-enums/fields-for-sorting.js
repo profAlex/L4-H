@@ -14,10 +14,11 @@ var BlogsSortListEnum;
 var PostsSortListEnum;
 (function (PostsSortListEnum) {
     PostsSortListEnum["Id"] = "id";
-    PostsSortListEnum["Name"] = "name";
-    PostsSortListEnum["Description"] = "description";
-    PostsSortListEnum["WebsiteUrl"] = "websiteUrl";
+    PostsSortListEnum["Title"] = "title";
+    PostsSortListEnum["ShortDescription"] = "shortDescription";
+    PostsSortListEnum["Content"] = "content";
+    PostsSortListEnum["BlogId"] = "blogId";
     PostsSortListEnum["CreatedAt"] = "createdAt";
-    PostsSortListEnum["IsMembership"] = "isMembership";
+    PostsSortListEnum["BlogName"] = "blogName";
 })(PostsSortListEnum || (exports.PostsSortListEnum = PostsSortListEnum = {}));
 ;

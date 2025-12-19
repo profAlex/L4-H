@@ -56,13 +56,13 @@ export const getSeveralPostsFromBlog = async (req: Request<{blogId: string}, {},
 
     const {items, totalCount} = await blogsService.getAllPostsFromBlog(blogId, sanitizedQuery);
 
-    const driversListOutput = mapToPostListPaginatedOutput(items, {
+    const postListOutput = mapToPostListPaginatedOutput(items, {
         pageNumber: sanitizedQuery.pageNumber,
         pageSize: sanitizedQuery.pageSize,
         totalCount,
     });
 
-    res.status(HttpStatus.Ok).send(driversListOutput);
+    res.status(HttpStatus.Ok).send(postListOutput);
 };
 
 

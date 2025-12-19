@@ -127,6 +127,137 @@ describe("Test API for managing blogs(bloggers)", () =>{
     });
 
 
+    it("GET '/api/blogs/' - same request but with custom query parameters - should respond with a list of bloggers (total 1 entries in items object)", async() => {
+        const res: Response = await request(testApp).get(`${BLOGS_PATH}/`).query({
+            searchNameTerm: 'klas',
+            pageNumber: 1,
+            sortDirection: 'asc',
+            sortBy: 'name',
+            pageSize: 20,
+        });
+
+        const entriesCount = Object.values(res.body.items).length;
+
+        // {
+        //     "pagesCount" : 1,
+        //     "page" : 1,
+        //     "pageSize" : 20,
+        //     "totalCount" : 1,
+        //     "items" : [ {
+        //         "id" : "69453fe2e253b3c5f4172458",
+        //         "name" : "blogger_002",
+        //         "description" : "a eto klassnii blogger!",
+        //         "websiteUrl" : "https://klassnii.blogger.com",
+        //         "createdAt" : "2025-12-19T12:06:58.701Z",
+        //         "isMembership" : false
+        //     } ]
+        // }
+
+        expect(res.body).toHaveProperty('pagesCount', 1);
+        expect(res.body).toHaveProperty('page', 1);
+        expect(res.body).toHaveProperty('pageSize', 20);
+        expect(res.body).toHaveProperty('totalCount', 1);
+        expect(res.body).toHaveProperty('items');
+        expect(Array.isArray(res.body.items)).toBe(true);
+
+        expect(res.body.items).toHaveLength(1);
+
+        expect(res.status).toBe(HttpStatus.Ok);
+    });
+
+
+    it("GET '/api/blogs/' - same request but with custom query parameters - checking if searchNameTerm: '' works properly - should respond with a list of bloggers (total 2 entries in items object)", async() => {
+        const res: Response = await request(testApp).get(`${BLOGS_PATH}/`).query({
+            searchNameTerm: '',
+            pageNumber: 1,
+            sortDirection: 'asc',
+            sortBy: 'name',
+            pageSize: 20,
+        });
+
+        const entriesCount = Object.values(res.body.items).length;
+
+        // {
+        //     "pagesCount" : 1,
+        //     "page" : 1,
+        //     "pageSize" : 20,
+        //     "totalCount" : 2,
+        //     "items" : [ {
+        //         "id" : "69455190cddbaaba0a264fe8",
+        //         "name" : "blogger_001",
+        //         "description" : "takoy sebe blogger...",
+        //         "websiteUrl" : "https://takoy.blogger.com",
+        //         "createdAt" : "2025-12-19T13:22:24.295Z",
+        //         "isMembership" : false
+        //     }, {
+        //         "id" : "69455191cddbaaba0a264feb",
+        //         "name" : "blogger_002",
+        //         "description" : "a eto klassnii blogger!",
+        //         "websiteUrl" : "https://klassnii.blogger.com",
+        //         "createdAt" : "2025-12-19T13:22:25.284Z",
+        //         "isMembership" : false
+        //     } ]
+        // }
+
+        expect(res.body).toHaveProperty('pagesCount', 1);
+        expect(res.body).toHaveProperty('page', 1);
+        expect(res.body).toHaveProperty('pageSize', 20);
+        expect(res.body).toHaveProperty('totalCount', 2);
+        expect(res.body).toHaveProperty('items');
+        expect(Array.isArray(res.body.items)).toBe(true);
+
+        expect(res.body.items).toHaveLength(2);
+
+        expect(res.status).toBe(HttpStatus.Ok);
+    });
+
+
+    it("GET '/api/blogs/' - same request but with custom query parameters - checking if searchNameTerm: null works properly - should respond with a list of bloggers (total 2 entries in items object)", async() => {
+        const res: Response = await request(testApp).get(`${BLOGS_PATH}/`).query({
+            searchNameTerm: null,
+            pageNumber: 1,
+            sortDirection: 'asc',
+            sortBy: 'name',
+            pageSize: 20,
+        });
+
+        const entriesCount = Object.values(res.body.items).length;
+
+        // {
+        //     "pagesCount" : 1,
+        //     "page" : 1,
+        //     "pageSize" : 20,
+        //     "totalCount" : 2,
+        //     "items" : [ {
+        //         "id" : "6945522774237c3203c2ccd7",
+        //         "name" : "blogger_001",
+        //         "description" : "takoy sebe blogger...",
+        //         "websiteUrl" : "https://takoy.blogger.com",
+        //         "createdAt" : "2025-12-19T13:24:55.640Z",
+        //         "isMembership" : false
+        //     }, {
+        //         "id" : "6945522874237c3203c2ccda",
+        //         "name" : "blogger_002",
+        //         "description" : "a eto klassnii blogger!",
+        //         "websiteUrl" : "https://klassnii.blogger.com",
+        //         "createdAt" : "2025-12-19T13:24:56.646Z",
+        //         "isMembership" : false
+        //     } ]
+        // }
+
+        expect(res.body).toHaveProperty('pagesCount', 1);
+        expect(res.body).toHaveProperty('page', 1);
+        expect(res.body).toHaveProperty('pageSize', 20);
+        expect(res.body).toHaveProperty('totalCount', 2);
+        expect(res.body).toHaveProperty('items');
+        expect(Array.isArray(res.body.items)).toBe(true);
+
+        expect(res.body.items).toHaveLength(2);
+
+        expect(res.status).toBe(HttpStatus.Ok);
+    });
+
+
     it("GET '/api/blogs/blogId/posts - Returns all posts for specified blog without query parameters (defaulted to preset numbers) - returns 2 items, with fields check.", async() => {
         const res: Response = await request(testApp).get(`${BLOGS_PATH}/${blogId_1}/posts/`);
 
